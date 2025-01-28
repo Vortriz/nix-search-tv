@@ -1,0 +1,3 @@
+[submodule "nix-search"]
+	path = nix-search
+	url = https://github.com/diamondburned/nix-search
