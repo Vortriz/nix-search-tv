@@ -2,20 +2,25 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
+	"github.com/3timeslazy/nix-search-tv/nix-search-tv/style"
+
 	"libdb.so/nix-search/search"
 	"libdb.so/nix-search/search/searchers/blugesearcher"
 )
 
+var ErrPkgNotFound = errors.New("package not found")
+
+const availableCommands = `Options are "index", "print", "preview"`
+
 func main() {
 	if len(os.Args) == 1 {
-		fmt.Println("command required")
+		fmt.Printf("A command is required. %s\n", availableCommands)
 		return
 	}
 
@@ -34,20 +39,27 @@ func main() {
 	}
 	if cmd == "preview" {
 		if len(os.Args) != 3 {
-			fmt.Println("package name required")
+			fmt.Println("A package path is required. Ex. nixpkgs.nix-search")
 			return
 		}
 
 		pkgPath := os.Args[2]
-		// TODO: don't panic
-		pkg := Must(SearchPkg(ctx, searcher, pkgPath))
-		enc := json.NewEncoder(os.Stdout)
-		enc.SetIndent("", "  ")
-		enc.Encode(pkg.Package)
+		pkg, err := SearchPkg(ctx, searcher, pkgPath)
+		if err != nil {
+			if errors.Is(err, ErrPkgNotFound) {
+				fmt.Println("package not found")
+				return
+			}
+
+			fmt.Println(err)
+			return
+		}
+
+		PreviewPkg(os.Stdout, pkg)
 		return
 	}
 
-	fmt.Printf("unknown command %q\n", os.Args[1])
+	fmt.Printf("Unknown command %q. %s\n", os.Args[1], availableCommands)
 	return
 }
 
@@ -76,7 +88,7 @@ func SearchPkg(ctx context.Context, searcher *blugesearcher.PackagesSearcher, pk
 		Exact: true,
 	})
 	if err != nil {
-		return search.SearchedPackage{}, err
+		return search.SearchedPackage{}, fmt.Errorf("nix-search error: %w", err)
 	}
 
 	for pkg := range pkgs {
@@ -85,7 +97,37 @@ func SearchPkg(ctx context.Context, searcher *blugesearcher.PackagesSearcher, pk
 		}
 	}
 
-	return search.SearchedPackage{}, errors.New("not found")
+	return search.SearchedPackage{}, ErrPkgNotFound
+}
+
+func PreviewPkg(out io.Writer, pkg search.SearchedPackage) {
+	styler := style.StyledText
+
+	// title
+	fmt.Fprint(out, styler.Bold(pkg.Name))
+	fmt.Fprint(out, " ", styler.Dim("("+pkg.Version+")"), "\n")
+
+	fmt.Fprint(out, style.Wrap(pkg.Description, ""))
+	// two new lines instead of one here and after to make `tv` render it as a single new line
+	fmt.Fprint(out, "\n\n")
+
+	if pkg.LongDescription != "" && pkg.Description != pkg.LongDescription {
+		fmt.Fprint(out, style.StyleLongDescription(styler, pkg.LongDescription), "\n")
+	}
+
+	fmt.Fprint(out, styler.Bold("license"), "\n")
+	if pkg.Unfree {
+		fmt.Fprint(out, "unfree $$$")
+	} else {
+		fmt.Fprint(out, "free as in freedom \\o/")
+	}
+	fmt.Fprint(out, "\n\n")
+
+	if pkg.MainProgram != "" {
+		fmt.Fprint(out, styler.Bold("main program"), "\n")
+		fmt.Fprint(out, style.PrintCodeBlock("$ "+pkg.MainProgram))
+		fmt.Fprint(out, "\n\n")
+	}
 }
 
 func Must[T any](v T, err error) T {

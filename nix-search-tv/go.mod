@@ -2,7 +2,10 @@ module github.com/3timeslazy/nix-search-tv/nix-search-tv
 
 go 1.23.4
 
-require libdb.so/nix-search v0.4.0
+require (
+	golang.org/x/term v0.8.0
+	libdb.so/nix-search v0.4.0
+)
 
 require (
 	github.com/RoaringBitmap/roaring v0.9.4 // indirect
