@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/nix-search-tv/style"
@@ -25,12 +26,16 @@ func main() {
 	}
 
 	ctx := context.Background()
-	searcher := Must(blugesearcher.Open(""))
+	searcher, err := blugesearcher.Open("")
+	if err != nil {
+		fmt.Printf("nix-search error: %v.\nHave you run nix-search?\n", err)
+		return
+	}
 	defer searcher.Close()
 
 	cmd := os.Args[1]
 	if cmd == "index" {
-		GeneratePkgsList(ctx, os.Stdout, searcher)
+		IndexCmd(ctx, searcher)
 		return
 	}
 	if cmd == "print" {
@@ -63,23 +68,63 @@ func main() {
 	return
 }
 
-func Print(wr io.Writer) error {
-	// TODO: save to xdg cache
-	absPath := "/home/vladimir/kode/src/github.com/3timeslazy/nix-search-tv/nix-search-tv/pkgs.txt"
-	asBytes, err := os.ReadFile(absPath)
+const indexFile = "nixpkgs.txt"
+
+func IndexCmd(ctx context.Context, searcher *blugesearcher.PackagesSearcher) error {
+	indexDir, err := defaultIndexPath()
 	if err != nil {
 		return err
+	}
+	if err := os.MkdirAll(indexDir, 0755); err != nil {
+		return fmt.Errorf("cannot create index directory: %w", err)
+	}
+
+	nixpkgsFile, err := os.Create(filepath.Join(indexDir, indexFile))
+	if err != nil {
+		return fmt.Errorf("cannot create nixpkgs.txt: %w", err)
+	}
+	err = generatePkgsList(ctx, nixpkgsFile, searcher)
+	if err != nil {
+		return fmt.Errorf("nix-search failed: %w", err)
+	}
+
+	return nil
+}
+
+func Print(wr io.Writer) error {
+	indexDir, err := defaultIndexPath()
+	if err != nil {
+		return err
+	}
+
+	nixpkgsFile := filepath.Join(indexDir, indexFile)
+	asBytes, err := os.ReadFile(nixpkgsFile)
+	if err != nil {
+		return fmt.Errorf("failed to read %s: %w", nixpkgsFile, err)
 	}
 
 	_, err = wr.Write(asBytes)
 	return err
 }
 
-func GeneratePkgsList(ctx context.Context, wr io.Writer, searcher *blugesearcher.PackagesSearcher) {
-	pkgsSeq := Must(searcher.SearchPackages(ctx, "", search.Opts{}))
-	for pkg := range pkgsSeq {
-		fmt.Fprintln(wr, pkg)
+func defaultIndexPath() (string, error) {
+	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return "", fmt.Errorf("cannot get user cache dir: %w", err)
 	}
+
+	return filepath.Join(cacheDir, "nix-search-tv"), nil
+}
+
+func generatePkgsList(ctx context.Context, out io.Writer, searcher *blugesearcher.PackagesSearcher) error {
+	pkgsSeq, err := searcher.SearchPackages(ctx, "", search.Opts{})
+	if err != nil {
+		return err
+	}
+	for pkg := range pkgsSeq {
+		fmt.Fprintln(out, pkg.Path)
+	}
+	return nil
 }
 
 func SearchPkg(ctx context.Context, searcher *blugesearcher.PackagesSearcher, pkgPath string) (search.SearchedPackage, error) {
