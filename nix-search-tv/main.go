@@ -107,6 +107,9 @@ func Print(wr io.Writer) error {
 	nixpkgsFile := filepath.Join(indexDir, indexFile)
 	asBytes, err := os.ReadFile(nixpkgsFile)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return errors.New("index file not found. Run `nix-search-tv index` and try again")
+		}
 		return fmt.Errorf("failed to read %s: %w", nixpkgsFile, err)
 	}
 
@@ -186,11 +189,4 @@ func PreviewPkg(out io.Writer, pkg search.SearchedPackage) {
 		fmt.Fprint(out, style.PrintCodeBlock("$ "+pkg.MainProgram))
 		fmt.Fprint(out, "\n\n")
 	}
-}
-
-func Must[T any](v T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
