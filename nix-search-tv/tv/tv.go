@@ -1,4 +1,4 @@
-package main
+package tv
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ import (
 // FullPkgName  - "<subpackage>?.<packageName>"
 // PkgName      - "<packageName>"
 
-func CutChannel(searchedPath string) string {
+func cutChannel(searchedPath string) string {
 	_, fullPkgName, found := strings.Cut(searchedPath, ".")
 	if !found {
 		panic(fmt.Sprintf("unexpected searched path %q", searchedPath))
@@ -35,7 +35,7 @@ func CutChannel(searchedPath string) string {
 	return fullPkgName
 }
 
-func CutSubpkg(fullPkgName string) string {
+func cutSubpkg(fullPkgName string) string {
 	path := strings.Split(fullPkgName, ".")
 	return path[len(path)-1]
 }
