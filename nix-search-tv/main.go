@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/nix-search-tv/style"
 
@@ -176,12 +177,24 @@ func PreviewPkg(out io.Writer, pkg search.SearchedPackage) {
 		fmt.Fprint(out, style.StyleLongDescription(styler, pkg.LongDescription), "\n")
 	}
 
-	fmt.Fprint(out, styler.Bold("license"), "\n")
-	if pkg.Unfree {
-		fmt.Fprint(out, "unfree $$$")
-	} else {
-		fmt.Fprint(out, "free as in freedom \\o/")
+	if len(pkg.Homepages) > 0 {
+		subtitle := "homepage"
+		if len(pkg.Homepages) > 1 {
+			subtitle += "s"
+		}
+		fmt.Fprint(out, styler.Bold(subtitle), "\n")
+		fmt.Fprint(out, strings.Join(pkg.Homepages, "\n"))
+		fmt.Fprint(out, "\n\n")
 	}
+
+	licenses := strings.Join(pkg.Licenses, "\n")
+	licenseType := "free"
+	if pkg.Unfree {
+		licenseType = "unfree"
+	}
+	fmt.Fprint(out, styler.Bold("license"))
+	fmt.Fprint(out, styler.Dim(" ("+licenseType+")"), "\n")
+	fmt.Fprint(out, licenses)
 	fmt.Fprint(out, "\n\n")
 
 	if pkg.MainProgram != "" {
