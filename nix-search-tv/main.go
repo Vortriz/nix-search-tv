@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/nix-search-tv/style"
 
@@ -55,8 +54,8 @@ func main() {
 			return
 		}
 
-		pkgPath := os.Args[2]
-		pkg, err := SearchPkg(ctx, searcher, pkgPath)
+		fullPkgName := os.Args[2]
+		pkg, err := SearchPkg(ctx, searcher, fullPkgName)
 		if err != nil {
 			if errors.Is(err, ErrPkgNotFound) {
 				fmt.Println("package not found")
@@ -138,13 +137,14 @@ func generatePkgsList(ctx context.Context, out io.Writer, searcher *blugesearche
 		return err
 	}
 	for pkg := range pkgsSeq {
-		fmt.Fprintln(out, pkg.Path)
+		fullPkgName := CutChannel(pkg.Path)
+		fmt.Fprintln(out, fullPkgName)
 	}
 	return nil
 }
 
-func SearchPkg(ctx context.Context, searcher *blugesearcher.PackagesSearcher, pkgPath string) (search.SearchedPackage, error) {
-	query, _ := strings.CutPrefix(pkgPath, "nixpkgs.")
+func SearchPkg(ctx context.Context, searcher *blugesearcher.PackagesSearcher, fullPkgName string) (search.SearchedPackage, error) {
+	query := CutSubpkg(fullPkgName)
 	pkgs, err := searcher.SearchPackages(ctx, query, search.Opts{
 		Exact: true,
 	})
@@ -153,7 +153,7 @@ func SearchPkg(ctx context.Context, searcher *blugesearcher.PackagesSearcher, pk
 	}
 
 	for pkg := range pkgs {
-		if pkg.Path == pkgPath {
+		if CutChannel(pkg.Path) == fullPkgName {
 			return pkg, nil
 		}
 	}
