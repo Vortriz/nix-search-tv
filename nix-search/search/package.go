@@ -23,7 +23,7 @@ type Package struct {
 	Version             string   `json:"version,omitempty"`
 	Description         string   `json:"description"`
 	LongDescription     string   `json:"longDescription,omitempty"`
-	Licenses            []string `json:"license,omitempty"` // usually SPDX identifiers
+	Licenses            []string `json:"licenses,omitempty"` // usually SPDX identifiers
 	MainProgram         string   `json:"mainProgram,omitempty"`
 	Broken              bool     `json:"broken,omitempty"`
 	Unfree              bool     `json:"unfree,omitempty"`
