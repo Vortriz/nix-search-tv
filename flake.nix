@@ -1,8 +1,7 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/1.tar.gz";
   };
 
   outputs = {
@@ -19,7 +18,6 @@
           packages = with pkgs; [
             go_1_23
             gopls
-            gotools
           ];
         };
 
@@ -28,10 +26,13 @@
           version = self.rev or "unknown";
           src = self;
 
-          vendorHash = "sha256-bModWDH5Htl5rZthtk/UTw/PXT+LrgyBjsvE6hgIePY=";
+          # vendorHash = nixpkgs.lib.fakeHash;
+          vendorHash = "sha256-n7v0PMPzXEPv8dLVEnCmKhaihmsKjOL8J+je8vxTthM=";
+
+          subPackages = ["cmd/nix-search-tv"];
 
           meta = {
-            description = "A tool integration television and nix-search packages";
+            description = "A tool integrating television and nix-search packages";
             homepage = "https://github.com/3timeslazy/nix-search-tv";
             mainProgram = "nix-search-tv";
           };

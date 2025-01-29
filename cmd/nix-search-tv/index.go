@@ -11,7 +11,7 @@ import (
 	"libdb.so/nix-search/search"
 	"libdb.so/nix-search/search/searchers/blugesearcher"
 
-	"github.com/3timeslazy/nix-search-tv/nix-search-tv/tv"
+	"github.com/3timeslazy/nix-search-tv/tv"
 	"github.com/hashicorp/go-hclog"
 	"github.com/urfave/cli/v3"
 )

@@ -7,7 +7,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/3timeslazy/nix-search-tv/nix-search-tv/style"
+	"github.com/3timeslazy/nix-search-tv/style"
 	"libdb.so/nix-search/search"
 	"libdb.so/nix-search/search/searchers/blugesearcher"
 )

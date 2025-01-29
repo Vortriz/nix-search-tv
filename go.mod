@@ -1,6 +1,8 @@
-module github.com/3timeslazy/nix-search-tv/nix-search-tv
+module github.com/3timeslazy/nix-search-tv
 
 go 1.23.4
+
+replace libdb.so/nix-search => ./nix-search
 
 require (
 	github.com/hashicorp/go-hclog v1.4.0

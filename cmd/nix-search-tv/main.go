@@ -6,9 +6,9 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/3timeslazy/nix-search-tv/tv"
 	"libdb.so/nix-search/search"
 
-	"github.com/3timeslazy/nix-search-tv/nix-search-tv/tv"
 	"github.com/hashicorp/go-hclog"
 	"github.com/urfave/cli/v3"
 )
