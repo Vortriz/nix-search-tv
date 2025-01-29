@@ -35,11 +35,18 @@ func main() {
 
 	cmd := os.Args[1]
 	if cmd == "index" {
-		IndexCmd(ctx, searcher)
+		err := IndexCmd(ctx, searcher)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		return
 	}
 	if cmd == "print" {
-		Print(os.Stdout)
+		err := Print(os.Stdout)
+		if err != nil {
+			fmt.Printf("failed to print package list: %v\n", err)
+		}
 		return
 	}
 	if cmd == "preview" {
@@ -108,9 +115,15 @@ func Print(wr io.Writer) error {
 }
 
 func defaultIndexPath() (string, error) {
-	cacheDir, err := os.UserCacheDir()
-	if err != nil {
-		return "", fmt.Errorf("cannot get user cache dir: %w", err)
+	var err error
+	// Check xdg first because `os.UserCacheDir`
+	// ignores XDG_CACHE_HOME on darwin
+	cacheDir := os.Getenv("XDG_CACHE_HOME")
+	if cacheDir == "" {
+		cacheDir, err = os.UserCacheDir()
+		if err != nil {
+			return "", fmt.Errorf("cannot get user cache dir: %w", err)
+		}
 	}
 
 	return filepath.Join(cacheDir, "nix-search-tv"), nil
