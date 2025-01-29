@@ -81,10 +81,11 @@ let
 				in
 					!availableOn.success || !availableOn.value;
 
-			# homepages =
-			# 	if pkg.meta ? "homepage"
-			# 	then singleton pkg.meta.homepage
-			# 	else null;
+			# Sometimes homepage can't be evaluated, but mostly works
+			homepages =
+				if pkg.meta ? "homepage" && isValid pkg.meta.homepage
+				then flatten pkg.meta.homepage
+				else null;
 		};
 
 	# bfs is too slow for Nix.

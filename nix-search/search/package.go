@@ -28,8 +28,7 @@ type Package struct {
 	Broken              bool     `json:"broken,omitempty"`
 	Unfree              bool     `json:"unfree,omitempty"`
 	UnsupportedPlatform bool     `json:"unsupportedPlatform,omitempty"`
-
-	// Homepages           []string `json:"homepages,omitempty"`
+	Homepages           []string `json:"homepages,omitempty"`
 }
 
 // TopLevelPackages is a set of packages that are top-level packages.
