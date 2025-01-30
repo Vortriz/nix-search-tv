@@ -30,7 +30,6 @@
           vendorHash = "sha256-n7v0PMPzXEPv8dLVEnCmKhaihmsKjOL8J+je8vxTthM=";
 
           subPackages = ["cmd/nix-search-tv"];
-          proxyVendor = true;
 
           meta = {
             description = "A tool integrating television and nix-search packages";
@@ -40,7 +39,10 @@
         };
 
         apps = {
-          default = "${self.packages.${system}.default}/bin/nix-search-tv";
+          default = {
+            type = "app";
+            program = "${self.packages.${system}.default}/bin/nix-search-tv";
+          };
         };
       }
     );
