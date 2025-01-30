@@ -29,7 +29,7 @@
           src = self;
 
           # vendorHash = nixpkgs.lib.fakeHash;
-          vendorHash = "sha256-n7v0PMPzXEPv8dLVEnCmKhaihmsKjOL8J+je8vxTthM=";
+          vendorHash = "sha256-uzNDhkovlXx0tIgSJ3E08d0TNmktSrlOOe8Iwi4ZfmU=";
 
           subPackages = ["cmd/nix-search-tv"];
 
