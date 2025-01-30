@@ -1,8 +1,9 @@
 {
+  description = "nix-search-tv";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/1.tar.gz";
   };
 
   outputs = {
@@ -22,7 +23,7 @@
           ];
         };
 
-        packages.default = pkgs.buildGoModule {
+        packages.default = pkgs.buildGo123Module {
           pname = "nix-search-tv";
           version = self.rev or "unknown";
           src = self;
@@ -36,13 +37,6 @@
             description = "A tool integrating television and nix-search packages";
             homepage = "https://github.com/3timeslazy/nix-search-tv";
             mainProgram = "nix-search-tv";
-          };
-        };
-
-        apps = {
-          default = {
-            type = "app";
-            program = "${self.packages.${system}.default}/bin/nix-search-tv";
           };
         };
       }
