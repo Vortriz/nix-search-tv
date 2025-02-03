@@ -50,8 +50,12 @@ func printPreview(out io.Writer, pkg search.SearchedPackage) {
 	styler := style.StyledText
 
 	// title
-	fmt.Fprint(out, styler.Bold(pkg.Name))
-	fmt.Fprint(out, " ", styler.Dim("("+pkg.Version+")"), "\n")
+	fmt.Fprint(out, styler.Red(styler.Bold(pkg.Name)))
+	fmt.Fprint(out, " ", styler.Dim("("+pkg.Version+")"))
+	if pkg.Broken {
+		fmt.Fprint(out, " ", styler.Red("(broken)"))
+	}
+	fmt.Fprintln(out)
 
 	fmt.Fprint(out, style.Wrap(pkg.Description, ""))
 	// two new lines instead of one here and after to make `tv` render it as a single new line

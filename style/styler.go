@@ -1,6 +1,10 @@
 package style
 
-import "strings"
+import (
+	"strings"
+
+	"libdb.so/nix-search/search"
+)
 
 type TextStyler uint8
 
@@ -27,6 +31,10 @@ func (s TextStyler) Underline(text string) string {
 
 func (s TextStyler) with(o TextStyler) TextStyler {
 	return s | o
+}
+
+func (s TextStyler) Red(text string) string {
+	return s.style(text, search.DefaultANSIEscapeColor, "\x1b[0m")
 }
 
 func (s TextStyler) style(text, prefix, suffix string) string {
