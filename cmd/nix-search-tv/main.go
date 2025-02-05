@@ -7,13 +7,10 @@ import (
 	"os/signal"
 
 	"github.com/3timeslazy/nix-search-tv/cmd"
-	"libdb.so/nix-search/search"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/urfave/cli/v3"
 )
-
-var opts = search.DefaultIndexPackageOpts
 
 var root = &cli.Command{
 	Name:      "nix-search-tv",
