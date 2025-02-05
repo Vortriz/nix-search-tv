@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/3timeslazy/nix-search-tv/tv"
+	"github.com/3timeslazy/nix-search-tv/cmd"
 	"libdb.so/nix-search/search"
 
 	"github.com/hashicorp/go-hclog"
@@ -15,24 +15,13 @@ import (
 
 var opts = search.DefaultIndexPackageOpts
 
-var app = cli.App{
+var root = &cli.Command{
 	Name:      "nix-search-tv",
 	UsageText: `nix-search-tv [options] [command]`,
-	Usage:     "A tool integrating nix-search and television",
+	Usage:     "Nix-related television channel",
 	Commands: []*cli.Command{
-		IndexCmd,
-		{
-			Name:      "print",
-			UsageText: "nix-search-tv print",
-			Usage:     "Print the list of all index Nix packages\nSupposed to be called by Television",
-			Action:    PrintCmd,
-		},
-		{
-			Name:      "preview",
-			UsageText: "nix-search-tv preview [package_name]",
-			Usage:     "Print preview for the package",
-			Action:    PreviewCmd,
-		},
+		cmd.Print,
+		cmd.Preview,
 	},
 }
 
@@ -40,7 +29,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	if err := app.RunContext(ctx, os.Args); err != nil {
+	if err := root.Run(ctx, os.Args); err != nil {
 		code := 1
 
 		var codeError cli.ExitCoder
@@ -53,17 +42,4 @@ func main() {
 
 		os.Exit(code)
 	}
-}
-
-func PrintCmd(c *cli.Context) error {
-	return tv.PrintPackages(os.Stdout)
-}
-
-func PreviewCmd(c *cli.Context) error {
-	fullPkgName := c.Args().First()
-	if fullPkgName == "" {
-		return errors.New("package name is required")
-	}
-
-	return tv.PrintPreview(c.Context, os.Stdout, fullPkgName)
 }

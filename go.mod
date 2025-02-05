@@ -6,7 +6,7 @@ replace libdb.so/nix-search => ./nix-search
 
 require (
 	github.com/hashicorp/go-hclog v1.4.0
-	github.com/urfave/cli/v3 v3.0.0-alpha2
+	github.com/urfave/cli/v3 v3.0.0-beta1
 	golang.org/x/term v0.8.0
 	libdb.so/nix-search v0.4.0
 )
