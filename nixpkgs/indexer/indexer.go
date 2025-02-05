@@ -48,45 +48,7 @@ func (indexer *Badger) Index(data io.Reader, indexedKeys io.Writer) error {
 	}
 
 	return batch.Flush()
-
-	// for name, pkg := range pkgs.Packages {
-	// 	err = bdg.db.Update(func(txn *badger.Txn) error {
-	// 		err := txn.Set([]byte(name), pkg)
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 		indexedKeys.Write(append([]byte(name), []byte("\n")...))
-	// 		return nil
-	// 	})
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
-	// return bdg.db.Sync()
 }
-
-// func (bdg *BadgerIndexer) ListAll(out io.Writer) error {
-// 	cachePath := MetadataDir + "/cache.txt"
-// 	cache, err := os.Open(cachePath)
-// 	if err == nil {
-// 		cache.WriteTo(out)
-// 		cache.Close()
-// 		return nil
-// 	}
-
-// 	return bdg.badger.View(func(txn *badger.Txn) error {
-// 		opts := badger.DefaultIteratorOptions
-// 		opts.PrefetchValues = false
-// 		it := txn.NewIterator(opts)
-// 		defer it.Close()
-// 		for it.Rewind(); it.Valid(); it.Next() {
-// 			k := it.Item().Key()
-// 			out.Write(append(k, []byte("\n")...))
-// 		}
-// 		return nil
-// 	})
-// }
 
 func (bdg *Badger) Load(pkgName string) (nixpkgs.Package, error) {
 	pkg := nixpkgs.Package{}
