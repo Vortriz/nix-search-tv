@@ -2,8 +2,6 @@ package style
 
 import (
 	"strings"
-
-	"libdb.so/nix-search/search"
 )
 
 type TextStyler uint8
@@ -11,6 +9,8 @@ type TextStyler uint8
 const (
 	StyledText TextStyler = 1 << iota
 	dontEndStyle
+
+	defaultANSIEscapeColor = "\x1b[31m" // FgRed
 )
 
 func (s TextStyler) Strikethrough(text string) string {
@@ -34,7 +34,7 @@ func (s TextStyler) with(o TextStyler) TextStyler {
 }
 
 func (s TextStyler) Red(text string) string {
-	return s.style(text, search.DefaultANSIEscapeColor, "\x1b[0m")
+	return s.style(text, defaultANSIEscapeColor, "\x1b[0m")
 }
 
 func (s TextStyler) style(text, prefix, suffix string) string {
