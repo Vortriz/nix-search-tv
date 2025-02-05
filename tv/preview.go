@@ -5,9 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strings"
 
-	"github.com/3timeslazy/nix-search-tv/style"
+	"github.com/3timeslazy/nix-search-tv/nixpkgs"
 	"libdb.so/nix-search/search"
 	"libdb.so/nix-search/search/searchers/blugesearcher"
 )
@@ -24,7 +23,25 @@ func PrintPreview(ctx context.Context, out io.Writer, fullPkgName string) error 
 		return fmt.Errorf("search package: %w", err)
 	}
 
-	printPreview(out, pkg)
+	newpkg := nixpkgs.Package{
+		FullName: fullPkgName,
+		Meta: nixpkgs.Meta{
+			Description:     pkg.Description,
+			LongDescription: pkg.LongDescription,
+			MainProgram:     pkg.MainProgram,
+			Homepages:       pkg.Homepages,
+			Unfree:          pkg.Unfree,
+			Name:            pkg.Name,
+		},
+		Version: pkg.Version,
+	}
+	for _, l := range pkg.Licenses {
+		newpkg.Meta.Licenses = append(newpkg.Meta.Licenses, nixpkgs.License{
+			FullName: l,
+		})
+	}
+
+	nixpkgs.Preview(out, newpkg)
 	return nil
 }
 
@@ -44,50 +61,4 @@ func searchPkg(ctx context.Context, searcher *blugesearcher.PackagesSearcher, fu
 	}
 
 	return search.SearchedPackage{}, errors.New("not found")
-}
-
-func printPreview(out io.Writer, pkg search.SearchedPackage) {
-	styler := style.StyledText
-
-	// title
-	fmt.Fprint(out, styler.Red(styler.Bold(pkg.Name)))
-	fmt.Fprint(out, " ", styler.Dim("("+pkg.Version+")"))
-	if pkg.Broken {
-		fmt.Fprint(out, " ", styler.Red("(broken)"))
-	}
-	fmt.Fprintln(out)
-
-	fmt.Fprint(out, style.Wrap(pkg.Description, ""))
-	// two new lines instead of one here and after to make `tv` render it as a single new line
-	fmt.Fprint(out, "\n\n")
-
-	if pkg.LongDescription != "" && pkg.Description != pkg.LongDescription {
-		fmt.Fprint(out, style.StyleLongDescription(styler, pkg.LongDescription), "\n")
-	}
-
-	if len(pkg.Homepages) > 0 {
-		subtitle := "homepage"
-		if len(pkg.Homepages) > 1 {
-			subtitle += "s"
-		}
-		fmt.Fprint(out, styler.Bold(subtitle), "\n")
-		fmt.Fprint(out, strings.Join(pkg.Homepages, "\n"))
-		fmt.Fprint(out, "\n\n")
-	}
-
-	licenses := strings.Join(pkg.Licenses, "\n")
-	licenseType := "free"
-	if pkg.Unfree {
-		licenseType = "unfree"
-	}
-	fmt.Fprint(out, styler.Bold("license"))
-	fmt.Fprint(out, styler.Dim(" ("+licenseType+")"), "\n")
-	fmt.Fprint(out, licenses)
-	fmt.Fprint(out, "\n\n")
-
-	if pkg.MainProgram != "" {
-		fmt.Fprint(out, styler.Bold("main program"), "\n")
-		fmt.Fprint(out, style.PrintCodeBlock("$ "+pkg.MainProgram))
-		fmt.Fprint(out, "\n\n")
-	}
 }
