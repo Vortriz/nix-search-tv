@@ -7,25 +7,21 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/guregu/null/v5"
 )
 
 type Config struct {
-	UpdateInterval Duration `json:"update_interval"`
-	CacheDir       string   `json:"cache_dir"`
+	UpdateInterval       Duration  `json:"update_interval"`
+	CacheDir             string    `json:"cache_dir"`
+	EnableWaitingMessage null.Bool `json:"enable_waiting_message"`
 }
 
-type Duration time.Duration
-
-func (d *Duration) UnmarshalJSON(b []byte) error {
-	b = bytes.Trim(b, `"`)
-	dur, err := time.ParseDuration(string(b))
-	if err != nil {
-		return fmt.Errorf("parse duration string: %w", err)
-	}
-
-	*d = Duration(dur)
-	return nil
-}
+// Keep the constants below in sync with the `Config` json tags
+const (
+	UpdateIntervalTag       = "update_interval"
+	EnableWaitingMessageTag = "enable_waiting_message"
+)
 
 func LoadPath(path string) (Config, error) {
 	data, err := os.ReadFile(path)
@@ -46,8 +42,9 @@ func Default() Config {
 		panic(err)
 	}
 	return Config{
-		UpdateInterval: Duration(time.Hour * 24),
-		CacheDir:       cacheDir,
+		UpdateInterval:       Duration(time.Hour * 24 * 7),
+		CacheDir:             cacheDir,
+		EnableWaitingMessage: null.BoolFrom(true),
 	}
 }
 
@@ -78,4 +75,17 @@ func ConfigDir() (string, error) {
 
 	path := filepath.Join(configDir, "nix-search-tv", "config.json")
 	return path, nil
+}
+
+type Duration time.Duration
+
+func (d *Duration) UnmarshalJSON(b []byte) error {
+	b = bytes.Trim(b, `"`)
+	dur, err := time.ParseDuration(string(b))
+	if err != nil {
+		return fmt.Errorf("parse duration string: %w", err)
+	}
+
+	*d = Duration(dur)
+	return nil
 }

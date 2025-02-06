@@ -35,6 +35,10 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("get config: %w", err)
 	}
+	if fullPkgName == waitingMessage {
+		PreviewWaiting(os.Stdout, conf)
+		return nil
+	}
 
 	indexerDir := path.Join(conf.CacheDir, "badger")
 	indexer, err := indexer.NewBadger(indexerDir)

@@ -41,6 +41,10 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if time.Since(md.LastIndexedAt) > time.Duration(conf.UpdateInterval) {
+		if conf.EnableWaitingMessage.Bool {
+			PrintWaiting(os.Stdout)
+		}
+
 		err = Index(ctx, conf, md.CurrRelease)
 		if err != nil {
 			return fmt.Errorf("failed to index: %w", err)
@@ -120,6 +124,10 @@ func GetConfig(cmd *cli.Command) (config.Config, error) {
 
 	conf.UpdateInterval = cmp.Or(loaded.UpdateInterval, conf.UpdateInterval)
 	conf.CacheDir = cmp.Or(loaded.CacheDir, conf.CacheDir)
+
+	if loaded.EnableWaitingMessage.Valid {
+		conf.EnableWaitingMessage = loaded.EnableWaitingMessage
+	}
 
 	if err := os.MkdirAll(conf.CacheDir, 0755); err != nil {
 		return conf, fmt.Errorf("cannot create cache directory: %w", err)
