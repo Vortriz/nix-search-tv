@@ -8,7 +8,7 @@ import (
 )
 
 type Package struct {
-	FullName string
+	FullName string `json:"_key"`
 	Meta     Meta   `json:"meta"`
 	Version  string `json:"version"`
 }

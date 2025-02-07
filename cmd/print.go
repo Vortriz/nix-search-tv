@@ -7,11 +7,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
-	"github.com/3timeslazy/nix-search-tv/metafiles"
 	"github.com/3timeslazy/nix-search-tv/nixpkgs"
 
 	"github.com/urfave/cli/v3"
@@ -35,28 +33,35 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("get config: %w", err)
 	}
-	md, err := metafiles.GetMetadata[nixpkgs.Metadata](conf.CacheDir)
-	if err != nil {
-		return fmt.Errorf("get metadata: %w", err)
-	}
+	flagIndexer := []string{Nixpkgs}
 
-	if time.Since(md.LastIndexedAt) > time.Duration(conf.UpdateInterval) {
+	indexes, mds, err := indexer.NeedIndexing(conf, flagIndexer)
+	if err != nil {
+		return fmt.Errorf("check if indexing needed: %w", err)
+	}
+	if len(mds) > 0 {
 		if conf.EnableWaitingMessage.Bool {
 			PrintWaiting(os.Stdout)
 		}
 
-		err = Index(ctx, conf, []string{Nixpkgs})
+		err = Index(ctx, conf, indexes)
 		if err != nil {
 			return err
 		}
 	}
 
-	cache, err := metafiles.CacheReader(conf.CacheDir)
-	if err != nil {
-		return fmt.Errorf("failed read cache: %w", err)
+	for _, index := range flagIndexer {
+		keys, err := indexer.OpenKeysReader(conf.CacheDir, index)
+		if err != nil {
+			return fmt.Errorf("failed to read %s keys: %w", index, err)
+		}
+		defer keys.Close()
+
+		if _, err := io.Copy(os.Stdout, keys); err != nil {
+			return err
+		}
 	}
 
-	_, _ = io.Copy(os.Stdout, cache)
 	return nil
 }
 

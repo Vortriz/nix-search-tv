@@ -13,7 +13,7 @@ import (
 const metadataFile = "metadata.json"
 const cacheFile = "cache.txt"
 
-func GetMetadata(dir string) (IndexMetadata, error) {
+func getIndexMetadata(dir string) (IndexMetadata, error) {
 	md := IndexMetadata{}
 	path, err := initFile(dir, metadataFile, []byte("{}"))
 	if err != nil {
@@ -32,7 +32,7 @@ func GetMetadata(dir string) (IndexMetadata, error) {
 	return md, nil
 }
 
-func SetMetadata(dir string, md IndexMetadata) error {
+func setIndexMetadata(dir string, md IndexMetadata) error {
 	mdpath, err := initFile(dir, metadataFile, []byte("{}"))
 	if err != nil {
 		return fmt.Errorf("init metadata: %w", err)
@@ -69,6 +69,10 @@ func CacheReader(dir string) (io.ReadCloser, error) {
 }
 
 func initFile(dir, file string, initValue []byte) (string, error) {
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", fmt.Errorf("cannot create directory: %w", err)
+	}
+
 	mdpath := path.Join(dir, file)
 
 	_, err := os.Stat(mdpath)

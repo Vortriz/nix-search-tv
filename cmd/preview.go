@@ -5,10 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 
+	"github.com/3timeslazy/nix-search-tv/indexer"
 	"github.com/3timeslazy/nix-search-tv/nixpkgs"
-	"github.com/3timeslazy/nix-search-tv/nixpkgs/indexer"
 	"github.com/urfave/cli/v3"
 )
 
@@ -40,14 +39,7 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	indexerDir := path.Join(conf.CacheDir, "badger")
-	indexer, err := indexer.NewBadger(indexerDir)
-	if err != nil {
-		return fmt.Errorf("open indexer: %w", err)
-	}
-	defer indexer.Close()
-
-	pkg, err := indexer.Load(fullPkgName)
+	pkg, err := indexer.LoadKey[nixpkgs.Package](conf, Nixpkgs, fullPkgName)
 	if err != nil {
 		return fmt.Errorf("load package: %w", err)
 	}

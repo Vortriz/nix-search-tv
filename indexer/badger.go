@@ -60,27 +60,35 @@ func (bdg *Badger) Load(pkgName string) (json.RawMessage, error) {
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
 			k := item.Key()
-
-			err := item.Value(func(v []byte) error {
-				if bytes.Equal(k, prefix) {
-					pkg = v
-				}
-				return nil
-			})
-			if err != nil {
-				return fmt.Errorf("load value: %w", err)
+			if !bytes.Equal(k, prefix) {
+				continue
 			}
+
+			var err error
+			pkg, err = item.ValueCopy(nil)
+			if err != nil {
+				return fmt.Errorf("copy value: %w", err)
+			}
+
+			break
 		}
+
 		return nil
 	})
+	if err != nil {
+		return nil, fmt.Errorf("iter failed: %w", err)
+	}
 
-	return pkg, err
+	return pkg, nil
 }
 
 func (bdg *Badger) Close() error {
 	return bdg.badger.Close()
 }
 
+// injectKey appends the `_key` field into the json object.
+//
+// This thing saves about ~2.5s on my laptop when indexing 120k nix packages
 func injectKey(key string, pkg json.RawMessage) json.RawMessage {
 	return append([]byte(`{"_key":"`+key+`",`), pkg[1:]...)
 }

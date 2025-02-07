@@ -13,6 +13,12 @@ require (
 )
 
 require (
+	github.com/alecthomas/repr v0.4.0 // indirect
+	github.com/hexops/gotextdiff v1.0.3 // indirect
+)
+
+require (
+	github.com/alecthomas/assert/v2 v2.11.0
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.8 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.32 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.32 // indirect
@@ -28,7 +34,7 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/flatbuffers v24.12.23+incompatible // indirect
-	github.com/guregu/null/v5 v5.0.0 // indirect
+	github.com/guregu/null/v5 v5.0.0
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
