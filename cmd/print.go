@@ -3,16 +3,16 @@ package cmd
 import (
 	"cmp"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"time"
 
 	"github.com/3timeslazy/nix-search-tv/config"
+	"github.com/3timeslazy/nix-search-tv/indexer"
 	"github.com/3timeslazy/nix-search-tv/metafiles"
 	"github.com/3timeslazy/nix-search-tv/nixpkgs"
-	"github.com/3timeslazy/nix-search-tv/nixpkgs/indexer"
 
 	"github.com/urfave/cli/v3"
 )
@@ -45,9 +45,9 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 			PrintWaiting(os.Stdout)
 		}
 
-		err = Index(ctx, conf, md.CurrRelease)
+		err = Index(ctx, conf, []string{Nixpkgs})
 		if err != nil {
-			return fmt.Errorf("failed to index: %w", err)
+			return err
 		}
 	}
 
@@ -60,49 +60,38 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func Index(ctx context.Context, conf config.Config, currRelease string) error {
-	indexerDir := path.Join(conf.CacheDir, "badger")
-	indexer, err := indexer.NewBadger(indexerDir)
-	if err != nil {
-		return fmt.Errorf("create indexer: %w", err)
-	}
-	defer indexer.Close()
+const (
+	Nixpkgs = "nixpkgs"
+)
 
-	release, err := nixpkgs.FindLatestRelease(ctx, currRelease)
-	if err != nil {
-		return fmt.Errorf("find latest release: %w", err)
-	}
-	if currRelease == release {
-		// Don't check the error, because displayed
-		// and outdated results are better than nothing
-		_ = metafiles.SetMetadata(conf.CacheDir, nixpkgs.Metadata{
-			LastIndexedAt: time.Now(),
-			CurrRelease:   release,
-		})
-		return nil
-	}
+var ErrUnknownIndex = errors.New("unknown index")
 
-	pkgs, err := nixpkgs.DownloadRelease(ctx, release)
-	if err != nil {
-		return fmt.Errorf("download release: %w", err)
-	}
-	defer pkgs.Close()
+func Index(ctx context.Context, conf config.Config, indexNames []string) error {
+	indexes := []indexer.Index{}
+	for _, indexName := range indexNames {
+		switch indexName {
+		case Nixpkgs:
+			indexes = append(indexes, indexer.Index{
+				Name:    indexName,
+				Fetcher: &nixpkgs.Fetcher{},
+			})
 
-	cache, err := metafiles.CacheWriter(conf.CacheDir)
-	if err != nil {
-		return err
-	}
-	defer cache.Close()
-
-	err = indexer.Index(pkgs, cache)
-	if err != nil {
-		return fmt.Errorf("index packages: %w", err)
+		default:
+			return ErrUnknownIndex
+		}
 	}
 
-	_ = metafiles.SetMetadata(conf.CacheDir, nixpkgs.Metadata{
-		LastIndexedAt: time.Now(),
-		CurrRelease:   release,
-	})
+	errs := indexer.RunIndexing(ctx, conf, indexes)
+	success := false
+	for _, err := range errs {
+		if err == nil {
+			success = true
+			continue
+		}
+	}
+	if !success {
+		return fmt.Errorf("all indexes failed: %w", errs[0])
+	}
 	return nil
 }
 
