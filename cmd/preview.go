@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/3timeslazy/nix-search-tv/indexer"
-	"github.com/3timeslazy/nix-search-tv/nixpkgs"
+	"github.com/3timeslazy/nix-search-tv/indexes"
 	"github.com/urfave/cli/v3"
 )
 
@@ -16,12 +16,7 @@ var Preview = &cli.Command{
 	UsageText: "nix-search-tv preview [package_name]",
 	Usage:     "Print preview for the package",
 	Action:    PreviewAction,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:  "config",
-			Usage: "path to the configuration file",
-		},
-	},
+	Flags:     baseFlags,
 }
 
 func PreviewAction(ctx context.Context, cmd *cli.Command) error {
@@ -39,11 +34,21 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	pkg, err := indexer.LoadKey[nixpkgs.Package](conf, Nixpkgs, fullPkgName)
-	if err != nil {
-		return fmt.Errorf("load package: %w", err)
+	inds := cmd.StringSlice(IndexesFlag.Name)
+	if len(inds) == 0 {
+		inds = conf.Indexes.V
 	}
 
-	nixpkgs.Preview(os.Stdout, pkg)
-	return nil
+	if len(inds) == 1 {
+		preview := indexes.Previews[inds[0]]
+		return preview(conf, fullPkgName)
+	}
+
+	ind, pkgName, ok := strings.Cut(fullPkgName, ":")
+	if !ok {
+		return errors.New("multiple indexes requested, but the package has no index prefix")
+	}
+
+	preview := indexes.Previews[ind]
+	return preview(conf, pkgName)
 }

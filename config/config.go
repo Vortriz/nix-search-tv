@@ -11,10 +11,13 @@ import (
 	"github.com/guregu/null/v5"
 )
 
+// Config represents configuration options stored in the
+// config file
 type Config struct {
-	UpdateInterval       Duration  `json:"update_interval"`
-	CacheDir             string    `json:"cache_dir"`
-	EnableWaitingMessage null.Bool `json:"enable_waiting_message"`
+	UpdateInterval       Duration             `json:"update_interval"`
+	CacheDir             string               `json:"cache_dir"`
+	EnableWaitingMessage null.Bool            `json:"enable_waiting_message"`
+	Indexes              null.Value[[]string] `json:"indexes"`
 }
 
 // Keep the constants below in sync with the `Config` json tags
@@ -45,6 +48,8 @@ func Default() Config {
 		UpdateInterval:       Duration(time.Hour * 24 * 7),
 		CacheDir:             cacheDir,
 		EnableWaitingMessage: null.BoolFrom(true),
+		// TODO: use constants from the indexes package
+		Indexes:              null.ValueFrom([]string{"nixpkgs"}),
 	}
 }
 
