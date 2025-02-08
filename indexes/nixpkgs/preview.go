@@ -13,7 +13,7 @@ func Preview(out io.Writer, pkg Package) {
 	styler := style.StyledText
 
 	// title
-	fmt.Fprint(out, styler.Red(styler.Bold(pkg.FullName)))
+	fmt.Fprint(out, styler.Red(styler.Bold(pkg.Name)))
 	fmt.Fprint(out, " ", styler.Dim("("+pkg.GetVersion()+")"))
 	if pkg.Meta.Broken {
 		fmt.Fprint(out, " ", styler.Red("(broken)"))

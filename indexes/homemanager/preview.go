@@ -13,7 +13,7 @@ func Preview(out io.Writer, pkg Package) {
 	styler := style.StyledText
 
 	// fmt.Fprint(out, styler.Red(styler.Bold(pkg.Name)))
-	fmt.Fprint(out, styleName(pkg.Key))
+	fmt.Fprint(out, styleName(pkg.Name))
 	fmt.Fprint(out, "\n\n")
 
 	fmt.Fprint(out, styler.Dim(pkg.Description))

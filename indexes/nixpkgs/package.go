@@ -5,12 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/3timeslazy/nix-search-tv/indexer"
 )
 
 type Package struct {
-	FullName string `json:"_key"`
-	Meta     Meta   `json:"meta"`
-	Version  string `json:"version"`
+	indexer.Package
+	Meta    Meta   `json:"meta"`
+	Version string `json:"version"`
 }
 
 type Meta struct {
@@ -95,5 +97,6 @@ func (pkg *Package) GetVersion() string {
 		return pkg.Version
 	}
 
-	return strings.TrimPrefix(pkg.Meta.Name, pkg.FullName+"-")
+	// TODO: comment about nvidia-docker
+	return strings.TrimPrefix(pkg.Meta.Name, pkg.Name+"-")
 }

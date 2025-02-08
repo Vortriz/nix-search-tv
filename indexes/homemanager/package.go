@@ -1,7 +1,11 @@
 package homemanager
 
+import (
+	"github.com/3timeslazy/nix-search-tv/indexer"
+)
+
 type Package struct {
-	Key string `json:"_key"`
+	indexer.Package
 	// Subs    []string
 	Example map[string]any `json:"example"`
 

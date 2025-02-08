@@ -93,6 +93,12 @@ func (bdg *Badger) Close() error {
 	return bdg.badger.Close()
 }
 
+// Package defines common field that
+// every package of any indexer must have
+type Package struct {
+	Name string `json:"_key"`
+}
+
 // injectKey appends the `_key` field into the json object.
 //
 // This thing saves about ~2.5s on my laptop when indexing 120k nix packages
