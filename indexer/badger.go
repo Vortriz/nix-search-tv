@@ -13,10 +13,16 @@ type Badger struct {
 	badger *badger.DB
 }
 
-func NewBadger(dir string) (*Badger, error) {
+type BadgerConfig struct {
+	Dir      string
+	InMemory bool
+}
+
+func NewBadger(conf BadgerConfig) (*Badger, error) {
 	opts := badger.
-		DefaultOptions(dir).
-		WithLoggingLevel(badger.ERROR)
+		DefaultOptions(conf.Dir).
+		WithLoggingLevel(badger.ERROR).
+		WithInMemory(conf.InMemory)
 	db, err := badger.Open(opts)
 	if err != nil {
 		return nil, fmt.Errorf("open badger: %w", err)

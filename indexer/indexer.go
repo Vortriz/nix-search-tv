@@ -72,7 +72,9 @@ func RunIndexing(
 			defer cache.Close()
 
 			badgerDir := filepath.Join(indexDir, "badger")
-			indexer, err := NewBadger(badgerDir)
+			indexer, err := NewBadger(BadgerConfig{
+				Dir: badgerDir,
+			})
 			if err != nil {
 				errs[i] = fmt.Errorf("open indexer: %w", err)
 				return
@@ -133,7 +135,9 @@ func LoadKey[T any](conf config.Config, index, key string) (T, error) {
 	var pkg T
 
 	badgerDir := filepath.Join(conf.CacheDir, index, "badger")
-	indexer, err := NewBadger(badgerDir)
+	indexer, err := NewBadger(BadgerConfig{
+		Dir: badgerDir,
+	})
 	if err != nil {
 		return pkg, fmt.Errorf("open indexer: %w", err)
 	}

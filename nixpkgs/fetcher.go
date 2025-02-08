@@ -66,3 +66,23 @@ func (f *Fetcher) DownloadRelease(ctx context.Context, release string) (io.ReadC
 		brd: brotli.NewReader(resp.Body),
 	}, nil
 }
+
+type brotliReadCloser struct {
+	rd  io.ReadCloser
+	brd *brotli.Reader
+}
+
+func newBrotli(rd io.ReadCloser) *brotliReadCloser {
+	return &brotliReadCloser{
+		rd:  rd,
+		brd: brotli.NewReader(rd),
+	}
+}
+
+func (br *brotliReadCloser) Close() error {
+	return br.rd.Close()
+}
+
+func (br *brotliReadCloser) Read(p []byte) (n int, err error) {
+	return br.brd.Read(p)
+}
