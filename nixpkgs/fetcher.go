@@ -24,6 +24,8 @@ func (f *Fetcher) GetLatestRelease(ctx context.Context, md indexer.IndexMetadata
 		Region: "eu-west-1",
 	})
 
+	// The `startAfter` is a marker for S3 to start iterating from. Just use the latest
+	// at the moment of writing nixpkgs release to never iterate from the beginning
 	startAfter := cmp.Or(md.CurrRelease, "nixpkgs/nixpkgs-25.05pre747523.95ea544c84eb")
 	var latest types.Object
 	input := &s3.ListObjectsV2Input{
@@ -61,10 +63,7 @@ func (f *Fetcher) DownloadRelease(ctx context.Context, release string) (io.ReadC
 		return nil, fmt.Errorf("expected http 200, but %d", resp.StatusCode)
 	}
 
-	return &brotliReadCloser{
-		rd:  resp.Body,
-		brd: brotli.NewReader(resp.Body),
-	}, nil
+	return newBrotli(resp.Body), nil
 }
 
 type brotliReadCloser struct {

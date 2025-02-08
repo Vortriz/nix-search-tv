@@ -2,6 +2,7 @@ package nixpkgs
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"slices"
 	"strings"
@@ -41,4 +42,14 @@ func TestFetcherOutput(t *testing.T) {
 	slices.Sort(actualLines)
 
 	assert.Equal(t, expectedLines, actualLines)
+
+	// Skip the first line because actualLines contain
+	// an empty string
+	for _, pkgName := range actualLines[1:] {
+		pkgContent, err := indexer.Load(pkgName)
+		assert.NoError(t, err)
+		if !json.Valid(pkgContent) {
+			t.Fatalf("package content is not a valid JSON:\nPackage: %s\nContent:%s", pkgName, string(pkgContent))
+		}
+	}
 }
