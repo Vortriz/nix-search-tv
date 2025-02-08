@@ -37,7 +37,7 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 
 	inds := cmd.StringSlice(IndexesFlag.Name)
 	if len(inds) == 0 {
-		inds = conf.Indexes.V
+		inds = conf.Indexes
 	}
 
 	if len(inds) == 1 {

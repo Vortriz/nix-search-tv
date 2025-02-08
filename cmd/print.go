@@ -27,7 +27,7 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	}
 	indexes := cmd.StringSlice(IndexesFlag.Name)
 	if len(indexes) == 0 {
-		indexes = conf.Indexes.V
+		indexes = conf.Indexes
 	}
 
 	needIndexing, mds, err := indexer.NeedIndexing(conf, indexes)
@@ -35,7 +35,7 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("check if indexing needed: %w", err)
 	}
 	if len(mds) > 0 {
-		if conf.EnableWaitingMessage.Bool {
+		if conf.EnableWaitingMessage {
 			PrintWaiting(os.Stdout)
 		}
 

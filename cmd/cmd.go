@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"cmp"
 	"fmt"
 	"maps"
 	"os"
@@ -40,29 +39,10 @@ var (
 )
 
 func GetConfig(cmd *cli.Command) (config.Config, error) {
-	var err error
-
-	conf := config.Default()
 	path := cmd.String(ConfigFlag.Name)
-	if path == "" {
-		path, err = config.ConfigDir()
-		if err != nil {
-			return conf, fmt.Errorf("get default config path: %w", err)
-		}
-	}
-	loaded, err := config.LoadPath(path)
+	conf, err := config.LoadPath(path)
 	if err != nil {
-		return conf, fmt.Errorf("load config: %w", err)
-	}
-
-	conf.UpdateInterval = cmp.Or(loaded.UpdateInterval, conf.UpdateInterval)
-	conf.CacheDir = cmp.Or(loaded.CacheDir, conf.CacheDir)
-
-	if loaded.Indexes.Valid {
-		conf.Indexes = loaded.Indexes
-	}
-	if loaded.EnableWaitingMessage.Valid {
-		conf.EnableWaitingMessage = loaded.EnableWaitingMessage
+		return config.Config{}, fmt.Errorf("load config: %w", err)
 	}
 
 	if err := os.MkdirAll(conf.CacheDir, 0755); err != nil {

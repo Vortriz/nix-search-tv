@@ -7,17 +7,22 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/guregu/null/v5"
 )
 
 // Config represents configuration options stored in the
 // config file
 type Config struct {
-	UpdateInterval       Duration             `json:"update_interval"`
-	CacheDir             string               `json:"cache_dir"`
-	EnableWaitingMessage null.Bool            `json:"enable_waiting_message"`
-	Indexes              null.Value[[]string] `json:"indexes"`
+	UpdateInterval       Duration `json:"update_interval"`
+	CacheDir             string   `json:"cache_dir"`
+	EnableWaitingMessage bool     `json:"enable_waiting_message"`
+	Indexes              []string `json:"indexes"`
+}
+
+type config struct {
+	UpdateInterval       *Duration `json:"update_interval"`
+	CacheDir             *string   `json:"cache_dir"`
+	EnableWaitingMessage *bool     `json:"enable_waiting_message"`
+	Indexes              *[]string `json:"indexes"`
 }
 
 // Keep the constants below in sync with the `Config` json tags
@@ -27,16 +32,42 @@ const (
 )
 
 func LoadPath(path string) (Config, error) {
+	var err error
+	if path == "" {
+		path, err = defaultConfigDir()
+		if err != nil {
+			return Config{}, fmt.Errorf("get default config path: %w", err)
+		}
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("read config file: %w", err)
 	}
 
-	conf := Config{}
-	return conf, json.Unmarshal(data, &conf)
+	loaded := config{}
+	err = json.Unmarshal(data, &loaded)
+	if err != nil {
+		return Config{}, fmt.Errorf("decode config file: %w", err)
+	}
+
+	conf := defaults()
+	if loaded.CacheDir != nil {
+		conf.CacheDir = *loaded.CacheDir
+	}
+	if loaded.UpdateInterval != nil {
+		conf.UpdateInterval = *loaded.UpdateInterval
+	}
+	if loaded.Indexes != nil {
+		conf.Indexes = *loaded.Indexes
+	}
+	if loaded.EnableWaitingMessage != nil {
+		conf.EnableWaitingMessage = *loaded.EnableWaitingMessage
+	}
+
+	return conf, nil
 }
 
-func Default() Config {
+func defaults() Config {
 	cacheDir, err := defaultCacheDir()
 	if err != nil {
 		// The code reach this point only if
@@ -47,9 +78,9 @@ func Default() Config {
 	return Config{
 		UpdateInterval:       Duration(time.Hour * 24 * 7),
 		CacheDir:             cacheDir,
-		EnableWaitingMessage: null.BoolFrom(true),
+		EnableWaitingMessage: true,
 		// TODO: use constants from the indexes package
-		Indexes:              null.ValueFrom([]string{"nixpkgs"}),
+		Indexes: []string{"nixpkgs"},
 	}
 }
 
@@ -68,7 +99,7 @@ func defaultCacheDir() (string, error) {
 	return filepath.Join(cacheDir, "nix-search-tv"), nil
 }
 
-func ConfigDir() (string, error) {
+func defaultConfigDir() (string, error) {
 	var err error
 	configDir := os.Getenv("XDG_CONFIG_HOME")
 	if configDir == "" {
