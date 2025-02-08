@@ -7,26 +7,25 @@ import (
 
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
-	"github.com/3timeslazy/nix-search-tv/indexes"
+	"github.com/3timeslazy/nix-search-tv/indexes/indices"
 )
 
 var ErrUnknownIndex = errors.New("unknown index")
 
 func Index(ctx context.Context, conf config.Config, indexNames []string) error {
-	indexesToRun := []indexer.Index{}
-
+	indexes := []indexer.Index{}
 	for _, indexName := range indexNames {
-		fetcher, ok := indexes.Fetchers[indexName]
+		fetcher, ok := indices.Fetchers[indexName]
 		if !ok {
 			return ErrUnknownIndex
 		}
-		indexesToRun = append(indexesToRun, indexer.Index{
+		indexes = append(indexes, indexer.Index{
 			Name:    indexName,
 			Fetcher: fetcher,
 		})
 	}
 
-	errs := indexer.RunIndexing(ctx, conf, indexesToRun)
+	errs := indexer.RunIndexing(ctx, conf, indexes)
 	success := false
 	for _, err := range errs {
 		if err == nil {

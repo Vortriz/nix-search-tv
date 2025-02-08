@@ -7,7 +7,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/3timeslazy/nix-search-tv/indexes"
+	"github.com/3timeslazy/nix-search-tv/indexes/indices"
+
 	"github.com/urfave/cli/v3"
 )
 
@@ -40,7 +41,7 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if len(inds) == 1 {
-		preview := indexes.Previews[inds[0]]
+		preview := indices.Previews[inds[0]]
 		return preview(conf, fullPkgName)
 	}
 
@@ -49,6 +50,6 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 		return errors.New("multiple indexes requested, but the package has no index prefix")
 	}
 
-	preview := indexes.Previews[ind]
+	preview := indices.Previews[ind]
 	return preview(conf, pkgName)
 }

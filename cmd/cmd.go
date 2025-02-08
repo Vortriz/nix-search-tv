@@ -8,7 +8,8 @@ import (
 	"slices"
 
 	"github.com/3timeslazy/nix-search-tv/config"
-	"github.com/3timeslazy/nix-search-tv/indexes"
+	"github.com/3timeslazy/nix-search-tv/indexes/indices"
+
 	"github.com/urfave/cli/v3"
 )
 
@@ -28,8 +29,8 @@ var (
 		Usage: "what packages to index",
 		Validator: func(indexNames []string) error {
 			for _, ind := range indexNames {
-				if !indexes.Indexes[ind] {
-					avail := slices.Collect(maps.Keys(indexes.Indexes))
+				if !indices.Indexes[ind] {
+					avail := slices.Collect(maps.Keys(indices.Indexes))
 					return fmt.Errorf("unknown index %q. Available options are: %v", ind, avail)
 				}
 			}
