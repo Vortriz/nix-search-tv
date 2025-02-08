@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 
 	"github.com/dgraph-io/badger/v4"
 )
@@ -96,5 +97,5 @@ func (bdg *Badger) Close() error {
 //
 // This thing saves about ~2.5s on my laptop when indexing 120k nix packages
 func injectKey(key string, pkg json.RawMessage) json.RawMessage {
-	return append([]byte(`{"_key":"`+key+`",`), pkg[1:]...)
+	return append([]byte(`{"_key":`+strconv.Quote(key)+`,`), pkg[1:]...)
 }
