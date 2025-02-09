@@ -1,3 +1,9 @@
+// Package indices is a wrapper around indexes/ package providing
+// a more convenient API for validating available indexes and picking up
+// their fetches and previews
+//
+// Also, as a lot of code uses `indexes` word for variable names, this package
+// creates an `indices` alias to avoid conflicts with `indexes`
 package indices
 
 import (

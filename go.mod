@@ -34,7 +34,6 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/flatbuffers v24.12.23+incompatible // indirect
-	github.com/guregu/null/v5 v5.0.0
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
