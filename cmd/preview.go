@@ -17,7 +17,7 @@ var Preview = &cli.Command{
 	UsageText: "nix-search-tv preview [package_name]",
 	Usage:     "Print preview for the package",
 	Action:    PreviewAction,
-	Flags:     baseFlags,
+	Flags:     BaseFlags(),
 }
 
 func PreviewAction(ctx context.Context, cmd *cli.Command) error {
@@ -35,7 +35,7 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	inds := cmd.StringSlice(IndexesFlag.Name)
+	inds := cmd.StringSlice(IndexesFlag)
 	if len(inds) == 0 {
 		inds = conf.Indexes
 	}

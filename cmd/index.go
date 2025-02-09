@@ -10,12 +10,14 @@ import (
 	"github.com/3timeslazy/nix-search-tv/indexes/indices"
 )
 
+var Fetchers = indices.Fetchers
+
 var ErrUnknownIndex = errors.New("unknown index")
 
 func Index(ctx context.Context, conf config.Config, indexNames []string) error {
 	indexes := []indexer.Index{}
 	for _, indexName := range indexNames {
-		fetcher, ok := indices.Fetchers[indexName]
+		fetcher, ok := Fetchers[indexName]
 		if !ok {
 			return ErrUnknownIndex
 		}

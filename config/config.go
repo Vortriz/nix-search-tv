@@ -3,7 +3,9 @@ package config
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
@@ -31,14 +33,31 @@ const (
 	EnableWaitingMessageTag = "enable_waiting_message"
 )
 
-func LoadPath(path string) (Config, error) {
-	var err error
-	if path == "" {
-		path, err = defaultConfigDir()
-		if err != nil {
-			return Config{}, fmt.Errorf("get default config path: %w", err)
-		}
+func LoadDefault() (Config, error) {
+	path, err := defaultConfigDir()
+	if err != nil {
+		return Config{}, fmt.Errorf("get default config path: %w", err)
 	}
+
+	data, err := os.ReadFile(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		data = []byte("{}")
+		err = nil
+	}
+	if err != nil {
+		return Config{}, fmt.Errorf("read config file: %w", err)
+	}
+
+	loaded := config{}
+	err = json.Unmarshal(data, &loaded)
+	if err != nil {
+		return Config{}, fmt.Errorf("decode config file: %w", err)
+	}
+
+	return mergeDefaults(loaded), nil
+}
+
+func LoadPath(path string) (Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return Config{}, fmt.Errorf("read config file: %w", err)
@@ -50,6 +69,10 @@ func LoadPath(path string) (Config, error) {
 		return Config{}, fmt.Errorf("decode config file: %w", err)
 	}
 
+	return mergeDefaults(loaded), nil
+}
+
+func mergeDefaults(loaded config) Config {
 	conf := defaults()
 	if loaded.CacheDir != nil {
 		conf.CacheDir = *loaded.CacheDir
@@ -64,7 +87,7 @@ func LoadPath(path string) (Config, error) {
 		conf.EnableWaitingMessage = *loaded.EnableWaitingMessage
 	}
 
-	return conf, nil
+	return conf
 }
 
 func defaults() Config {

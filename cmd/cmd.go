@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"os"
 	"slices"
@@ -12,35 +14,50 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var (
-	baseFlags = []cli.Flag{
-		ConfigFlag,
-		IndexesFlag,
-	}
-
-	ConfigFlag = &cli.StringFlag{
-		Name:  "config",
-		Usage: "path to the configuration file",
-	}
-
-	IndexesFlag = &cli.StringSliceFlag{
-		Name:  "indexes",
-		Usage: "what packages to index",
-		Validator: func(indexNames []string) error {
-			for _, ind := range indexNames {
-				if !indices.Indexes[ind] {
-					avail := slices.Collect(maps.Keys(indices.Indexes))
-					return fmt.Errorf("unknown index %q. Available options are: %v", ind, avail)
+func BaseFlags() []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{
+			Name:  ConfigFlag,
+			Usage: "path to the configuration file",
+			Validator: func(path string) error {
+				if path == "" {
+					return errors.New("config path cannot be empty")
 				}
-			}
-			return nil
+				return nil
+			},
+		},
+		&cli.StringSliceFlag{
+			Name:  IndexesFlag,
+			Usage: "what packages to index",
+			Validator: func(indexNames []string) error {
+				for _, ind := range indexNames {
+					if !indices.Indexes[ind] {
+						avail := slices.Collect(maps.Keys(indices.Indexes))
+						return fmt.Errorf("unknown index %q. Available options are: %v", ind, avail)
+					}
+				}
+				return nil
+			},
 		},
 	}
+}
+
+const (
+	ConfigFlag  = "config"
+	IndexesFlag = "indexes"
 )
 
+var Stdout io.ReadWriter = os.Stdout
+
 func GetConfig(cmd *cli.Command) (config.Config, error) {
-	path := cmd.String(ConfigFlag.Name)
-	conf, err := config.LoadPath(path)
+	var conf config.Config
+	var err error
+
+	if cmd.IsSet(ConfigFlag) {
+		conf, err = config.LoadPath(cmd.String(ConfigFlag))
+	} else {
+		conf, err = config.LoadDefault()
+	}
 	if err != nil {
 		return config.Config{}, fmt.Errorf("load config: %w", err)
 	}

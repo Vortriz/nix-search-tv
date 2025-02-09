@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/3timeslazy/nix-search-tv/indexer"
 
@@ -17,7 +16,7 @@ var Print = &cli.Command{
 	UsageText: "nix-search-tv print",
 	Usage:     "Print the list of all index Nix packages",
 	Action:    PrintAction,
-	Flags:     baseFlags,
+	Flags:     BaseFlags(),
 }
 
 func PrintAction(ctx context.Context, cmd *cli.Command) error {
@@ -25,7 +24,7 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("get config: %w", err)
 	}
-	indexes := cmd.StringSlice(IndexesFlag.Name)
+	indexes := cmd.StringSlice(IndexesFlag)
 	if len(indexes) == 0 {
 		indexes = conf.Indexes
 	}
@@ -36,7 +35,7 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	}
 	if len(mds) > 0 {
 		if conf.EnableWaitingMessage {
-			PrintWaiting(os.Stdout)
+			PrintWaiting(Stdout)
 		}
 
 		err = Index(ctx, conf, needIndexing)
@@ -67,14 +66,14 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 
 func PrintKeys(prefix string, pkgs io.Reader) error {
 	if prefix == "" {
-		_, err := io.Copy(os.Stdout, pkgs)
+		_, err := io.Copy(Stdout, pkgs)
 		return err
 	}
 
 	prefixb := []byte(prefix + ":")
 	scanner := bufio.NewScanner(pkgs)
 	for scanner.Scan() {
-		os.Stdout.Write(append(prefixb, append(scanner.Bytes(), '\n')...))
+		Stdout.Write(append(prefixb, append(scanner.Bytes(), '\n')...))
 	}
 
 	return nil
