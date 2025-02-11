@@ -21,7 +21,7 @@ var Preview = &cli.Command{
 }
 
 func PreviewAction(ctx context.Context, cmd *cli.Command) error {
-	fullPkgName := cmd.Args().First()
+	fullPkgName := strings.Join(cmd.Args().Slice(), " ")
 	if fullPkgName == "" {
 		return errors.New("package name is required")
 	}
@@ -45,7 +45,7 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 		return preview(conf, fullPkgName)
 	}
 
-	ind, pkgName, ok := strings.Cut(fullPkgName, ":")
+	ind, pkgName, ok := cutIndexPrefix(fullPkgName)
 	if !ok {
 		return errors.New("multiple indexes requested, but the package has no index prefix")
 	}

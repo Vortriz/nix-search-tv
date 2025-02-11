@@ -64,16 +64,16 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func PrintKeys(prefix string, pkgs io.Reader) error {
-	if prefix == "" {
+func PrintKeys(index string, pkgs io.Reader) error {
+	if index == "" {
 		_, err := io.Copy(Stdout, pkgs)
 		return err
 	}
 
-	prefixb := []byte(prefix + ":")
 	scanner := bufio.NewScanner(pkgs)
 	for scanner.Scan() {
-		Stdout.Write(append(prefixb, append(scanner.Bytes(), '\n')...))
+		out := addIndexPrefix(index, scanner.Text()+"\n")
+		Stdout.Write([]byte(out))
 	}
 
 	return nil
