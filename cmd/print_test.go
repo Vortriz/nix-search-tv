@@ -1,12 +1,14 @@
 package cmd
 
 import (
-	"bytes"
+	"cmp"
 	"context"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/3timeslazy/nix-search-tv/indexer"
@@ -15,7 +17,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func TestPrint_Errors(t *testing.T) {
+func TestPrintInvalidFlags(t *testing.T) {
 	ctx := context.Background()
 
 	runPrint := func(args ...string) error {
@@ -44,19 +46,16 @@ func TestPrint_Errors(t *testing.T) {
 	})
 }
 
-func TestPrint_Config(t *testing.T) {
+func TestPrintConfig(t *testing.T) {
 	ctx := context.Background()
 
-	Fetchers = map[string]indexer.Fetcher{
-		indices.Nixpkgs: &NixpkgsFetcher{},
-	}
-
-	runPrint := func(t *testing.T, ctx context.Context, args []string) {
+	runPrint := func(t *testing.T, ctx context.Context) {
 		cmd := cli.Command{
+			Writer: io.Discard,
 			Flags:  BaseFlags(),
 			Action: PrintAction,
 		}
-		err := cmd.Run(ctx, append([]string{"print"}, args...))
+		err := cmd.Run(ctx, []string{"print"})
 		assert.NoError(t, err)
 	}
 
@@ -71,7 +70,7 @@ func TestPrint_Config(t *testing.T) {
 		conffile := filepath.Join(confdir, "config.json")
 		assert.NoError(t, os.WriteFile(conffile, []byte(`{ "enable_waiting_message": false }`), 0666))
 
-		runPrint(t, ctx, nil)
+		runPrint(t, ctx)
 
 		data := state.Stdout.String()
 		assert.NotContains(t, data, waitingMessage)
@@ -81,7 +80,7 @@ func TestPrint_Config(t *testing.T) {
 	t.Run("use defaults when default file not exist", func(t *testing.T) {
 		state := setup(t)
 
-		runPrint(t, ctx, nil)
+		runPrint(t, ctx)
 
 		// enable_waiting_message is true by default, so
 		// if we see it in the output - the defaults were used
@@ -91,145 +90,101 @@ func TestPrint_Config(t *testing.T) {
 	})
 }
 
-type state struct {
-	CacheDir  string
-	ConfigDir string
-	Stdout    *bytes.Buffer
-}
+func TestPrintIndexing(t *testing.T) {
+	ctx := context.Background()
 
-func setup(t *testing.T) state {
-	cacheDir, err := os.MkdirTemp("", "nix-search-tv-cache")
-	assert.NoError(t, err)
-	err = os.Setenv("XDG_CACHE_HOME", cacheDir)
-	assert.NoError(t, err)
-
-	configDir, err := os.MkdirTemp("", "nix-search-tv-config")
-	assert.NoError(t, err)
-	err = os.Setenv("XDG_CONFIG_HOME", configDir)
-	assert.NoError(t, err)
-
-	buf := bytes.NewBuffer(nil)
-	Stdout = buf
-
-	t.Cleanup(func() {
-		assert.NoError(t, os.RemoveAll(cacheDir))
-		assert.NoError(t, os.RemoveAll(configDir))
-
-		// Set these to "." so that is anything leaks,
-		// we'll see in the test directory
-		err = os.Setenv("XDG_CACHE_HOME", "./tmp-tests/cache")
+	runPrint := func(t *testing.T, ctx context.Context, cacheDir string) {
+		cmd := cli.Command{
+			Writer: io.Discard,
+			Flags:  BaseFlags(),
+			Action: PrintAction,
+		}
+		err := cmd.Run(ctx, append([]string{"print"}, []string{
+			"--indexes", indices.Nixpkgs,
+			"--cache-dir", cacheDir,
+		}...))
 		assert.NoError(t, err)
-		err = os.Setenv("XDG_CONFIG_HOME", "./tmp-tests/config")
+	}
+
+	t.Run("run -> no index -> indexing", func(t *testing.T) {
+		state := setup(t)
+
+		_, err := os.Stat(filepath.Join(state.CacheDir, indices.Nixpkgs))
+		assert.IsError(t, err, fs.ErrNotExist)
+
+		runPrint(t, ctx, state.CacheDir)
+
+		expectedPaths := map[string]bool{
+			"nixpkgs":               false,
+			"nixpkgs/badger":        false,
+			"nixpkgs/cache.txt":     false,
+			"nixpkgs/metadata.json": false,
+		}
+		err = filepath.WalkDir(state.CacheDir, func(path string, d fs.DirEntry, err error) error {
+			for expectedPath := range expectedPaths {
+				if strings.HasSuffix(path, expectedPath) {
+					expectedPaths[expectedPath] = true
+				}
+			}
+			return nil
+		})
 		assert.NoError(t, err)
 
-		Stdout = nil
+		for expectedPath, ok := range expectedPaths {
+			assert.True(t, ok, "File not found: %s", expectedPath)
+		}
+
+		cache := getCache(t, state)
+		assertSortEqual(t, []string{"nix-search-tv"}, cache)
 	})
 
-	return state{
-		CacheDir:  cacheDir,
-		ConfigDir: configDir,
-		Stdout:    buf,
-	}
+	t.Run("has index -> need indexing -> indexing", func(t *testing.T) {
+		state := setup(t)
+
+		_, err := os.Stat(filepath.Join(state.CacheDir, indices.Nixpkgs))
+		assert.IsError(t, err, fs.ErrNotExist)
+
+		// generate the first index
+		runPrint(t, ctx, state.CacheDir)
+
+		// reset metadata and run again
+		newpkgs := []string{"televison", "fzf"}
+		setNixpkgs(newpkgs...)
+		setMetadata(t, state, indexer.IndexMetadata{})
+		runPrint(t, ctx, state.CacheDir)
+
+		cache := getCache(t, state)
+		assertSortEqual(t, newpkgs, cache)
+	})
+
+	t.Run("has index -> indexing not needed", func(t *testing.T) {
+		state := setup(t)
+
+		_, err := os.Stat(filepath.Join(state.CacheDir, indices.Nixpkgs))
+		assert.IsError(t, err, fs.ErrNotExist)
+
+		// generate the first index
+		runPrint(t, ctx, state.CacheDir)
+
+		// set fetchers to nil. If everything is correct, they won't be triggered. If
+		// there's a bug, the test will panic
+		Fetchers = nil
+		assert.NotPanics(t, func() {
+			runPrint(t, ctx, state.CacheDir)
+		})
+	})
+
+	t.Run("need update, but not new version", func(t *testing.T) {
+
+	})
+
+	t.Run("run multiple indexes at once", func(t *testing.T) {
+
+	})
 }
 
-type NixpkgsFetcher struct{}
-
-func (f *NixpkgsFetcher) GetLatestRelease(ctx context.Context, md indexer.IndexMetadata) (string, error) {
-	return "nixpkgs", nil
+func assertSortEqual[S ~[]E, E cmp.Ordered](t *testing.T, expected, actual S) {
+	slices.Sort(expected)
+	slices.Sort(actual)
+	assert.Equal(t, expected, actual)
 }
-
-func (f *NixpkgsFetcher) DownloadRelease(ctx context.Context, release string) (io.ReadCloser, error) {
-	pkgs := bytes.NewBufferString(`{
-	  "packages": {
-	    "nix-search-tv": {}
-	  }
-	}`)
-
-	return io.NopCloser(pkgs), nil
-}
-
-// func (f *NixpkgsFetcher) DownloadRelease(ctx context.Context, release string) (io.ReadCloser, error) {
-// 	pkgs := bytes.NewBufferString(`
-// {
-//   "packages": {
-//     "nix-search-tv": {
-//       "meta": {
-//         "available": true,
-//         "broken": false,
-//         "changelog": "https://github.com/3timeslazy/nix-search-tv/releases/tag/v1.0.0",
-//         "description": "Nixpkgs channel for television",
-//         "homepage": "https://github.com/3timeslazy/nix-search-tv",
-//         "insecure": false,
-//         "license": {
-//           "deprecated": false,
-//           "free": true,
-//           "fullName": "GNU General Public License v3.0 only",
-//           "redistributable": true,
-//           "shortName": "gpl3Only",
-//           "spdxId": "GPL-3.0-only",
-//           "url": "https://spdx.org/licenses/GPL-3.0-only.html"
-//         },
-//         "mainProgram": "nix-search-tv",
-//         "maintainers": [
-//           {
-//             "email": "gaetan@glepage.com",
-//             "github": "GaetanLepage",
-//             "githubId": 33058747,
-//             "name": "Gaetan Lepage"
-//           }
-//         ],
-//         "name": "nix-search-tv-1.0.0",
-//         "outputsToInstall": [
-//           "out"
-//         ],
-//         "platforms": [
-//           "x86_64-darwin",
-//           "i686-darwin",
-//           "aarch64-darwin",
-//           "armv7a-darwin",
-//           "aarch64-linux",
-//           "armv5tel-linux",
-//           "armv6l-linux",
-//           "armv7a-linux",
-//           "armv7l-linux",
-//           "i686-linux",
-//           "loongarch64-linux",
-//           "m68k-linux",
-//           "microblaze-linux",
-//           "microblazeel-linux",
-//           "mips-linux",
-//           "mips64-linux",
-//           "mips64el-linux",
-//           "mipsel-linux",
-//           "powerpc64-linux",
-//           "powerpc64le-linux",
-//           "riscv32-linux",
-//           "riscv64-linux",
-//           "s390-linux",
-//           "s390x-linux",
-//           "x86_64-linux",
-//           "wasm64-wasi",
-//           "wasm32-wasi",
-//           "i686-freebsd",
-//           "x86_64-freebsd",
-//           "aarch64-freebsd"
-//         ],
-//         "position": "pkgs/by-name/ni/nix-search-tv/package.nix:33",
-//         "unfree": false,
-//         "unsupported": false
-//       },
-//       "name": "nix-search-tv-1.0.0",
-//       "outputName": "out",
-//       "outputs": {
-//         "out": null
-//       },
-//       "pname": "nix-search-tv",
-//       "system": "x86_64-linux",
-//       "version": "1.0.0"
-//     }
-//   }
-// }
-// 	`)
-
-// 	return io.NopCloser(pkgs), nil
-// }
