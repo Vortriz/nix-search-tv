@@ -56,6 +56,16 @@ func (indexer *Badger) Index(data io.Reader, indexedKeys io.Writer) error {
 		return fmt.Errorf("decode json: %w", err)
 	}
 
+	// Delete previous index. If we do not do that
+	// and just re-assign the keys below, the index
+	// will be updated, however its size will increase drastically.
+	// Then, to keep the index size small, we'll need to deal with
+	// badger's garbade colletion. So, it's just easier to drop everything
+	err = indexer.badger.DropAll()
+	if err != nil {
+		return fmt.Errorf("drop all: %w", err)
+	}
+
 	batch := indexer.badger.NewWriteBatch()
 	for name, pkg := range pkgs.Packages {
 		nameb := []byte(name)
