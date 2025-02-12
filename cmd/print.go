@@ -24,12 +24,8 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("get config: %w", err)
 	}
-	indexes := cmd.StringSlice(IndexesFlag)
-	if len(indexes) == 0 {
-		indexes = conf.Indexes
-	}
 
-	needIndexing, mds, err := indexer.NeedIndexing(conf, indexes)
+	needIndexing, mds, err := indexer.NeedIndexing(conf, conf.Indexes)
 	if err != nil {
 		return fmt.Errorf("check if indexing needed: %w", err)
 	}
@@ -44,8 +40,8 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	needPrefix := len(indexes) > 1
-	for _, index := range indexes {
+	needPrefix := len(conf.Indexes) > 1
+	for _, index := range conf.Indexes {
 		keys, err := indexer.OpenKeysReader(conf.CacheDir, index)
 		if err != nil {
 			return fmt.Errorf("failed to read %s keys: %w", index, err)

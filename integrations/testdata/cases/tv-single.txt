@@ -1,0 +1,24 @@
+╭──────────────────────────────────────╮╭───────── rPackages.OOBCurve ─────────╮
+│>                             1 / 10  ││                                      │
+╰──────────────────────────────────────╯│ rPackages.OOBCurve (0.3)             │
+╭────────────── Results ───────────────╮│                                      │
+│> rPackages.OOBCurve                  ││                                      │
+│  pantheon.elementary-iconbrowser     ││ homepage                             │
+│  rPackages.BasicSTARRseq             ││ https://cran.r-project.org/web/pack  │
+│  rPackages.minfiData                 ││                                      │
+│  sbclPackages.cl-glfw-opengl-apple__ ││ license (free)                       │
+│  python313Packages.cppe              ││ No License                           │
+│  docbook_sgml_dtd_31                 ││                                      │
+│  haskellPackages.PropaFP             ││                                      │
+│  haskellPackages.wsdl                ││                                      │
+│  ocamlPackages.github                ││                                      │
+│                                      ││                                      │
+│                                      ││                                      │
+│                                      ││                                      │
+│                                      ││                                      │
+│                                      ││                                      │
+│                                      ││                                      │
+│                                      ││                                      │
+│                                      ││                                      │
+│                                      ││                                      │
+╰─ help: <Ctrl-g>  preview: <Ctrl-o> ──╯╰──────────────────────────────────────╯

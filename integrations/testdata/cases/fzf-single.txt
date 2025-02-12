@@ -1,0 +1,24 @@
+                                        ╭──────────────────────────────────────╮
+                                        │ rPackages.OOBCurve (0.3)             │
+                                        │                                      │
+                                        │                                      │
+                                        │ homepage                             │
+                                        │ https://cran.r-project.org/web/packa │
+                                        │                                      │
+                                        │ license (free)                       │
+                                        │ No License                           │
+                                        │                                      │
+                                        │                                      │
+                                        │                                      │
+  ocamlPackages.github                  │                                      │
+  haskellPackages.wsdl                  │                                      │
+  haskellPackages.PropaFP               │                                      │
+  docbook_sgml_dtd_31                   │                                      │
+  python313Packages.cppe                │                                      │
+  sbclPackages.cl-glfw-opengl-apple__·· │                                      │
+  rPackages.minfiData                   │                                      │
+  rPackages.BasicSTARRseq               │                                      │
+  pantheon.elementary-iconbrowser       │                                      │
+▌ rPackages.OOBCurve                    │                                      │
+  10/10 ─────────────────────────────── │                                      │
+>                                       ╰──────────────────────────────────────╯

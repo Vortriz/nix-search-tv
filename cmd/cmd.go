@@ -39,12 +39,18 @@ func BaseFlags() []cli.Flag {
 				return nil
 			},
 		},
+		&cli.StringFlag{
+			Name:   CacheDirFlag,
+			Hidden: true,
+			Usage:  "Path to the indexes cache directory",
+		},
 	}
 }
 
 const (
-	ConfigFlag  = "config"
-	IndexesFlag = "indexes"
+	ConfigFlag   = "config"
+	IndexesFlag  = "indexes"
+	CacheDirFlag = "cache-dir"
 )
 
 var Stdout io.ReadWriter = os.Stdout
@@ -60,6 +66,13 @@ func GetConfig(cmd *cli.Command) (config.Config, error) {
 	}
 	if err != nil {
 		return config.Config{}, fmt.Errorf("load config: %w", err)
+	}
+
+	if cmd.IsSet(IndexesFlag) {
+		conf.Indexes = cmd.StringSlice(IndexesFlag)
+	}
+	if cmd.IsSet(CacheDirFlag) {
+		conf.CacheDir = cmd.String(CacheDirFlag)
 	}
 
 	if err := os.MkdirAll(conf.CacheDir, 0755); err != nil {

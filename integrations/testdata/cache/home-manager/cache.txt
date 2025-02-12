@@ -1,0 +1,10 @@
+programs.git.difftastic.color
+programs.pandoc.templates
+programs.ssh.matchBlocks.<name>.localForwards.*.host.address
+programs.firefox.profiles.<name>.search.force
+programs.kakoune.config.autoReload
+programs.tmux.shortcut
+programs.ssh.matchBlocks.<name>.match
+services.signaturepdf.port
+xdg.desktopEntries.<name>.terminal
+home.pointerCursor.hyprcursor.size

@@ -35,13 +35,8 @@ func PreviewAction(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	inds := cmd.StringSlice(IndexesFlag)
-	if len(inds) == 0 {
-		inds = conf.Indexes
-	}
-
-	if len(inds) == 1 {
-		preview := indices.Previews[inds[0]]
+	if len(conf.Indexes) == 1 {
+		preview := indices.Previews[conf.Indexes[0]]
 		return preview(conf, fullPkgName)
 	}
 

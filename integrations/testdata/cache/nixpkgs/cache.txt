@@ -1,0 +1,10 @@
+rPackages.OOBCurve
+pantheon.elementary-iconbrowser
+rPackages.BasicSTARRseq
+rPackages.minfiData
+sbclPackages.cl-glfw-opengl-apple__aux__depth__stencil
+python313Packages.cppe
+docbook_sgml_dtd_31
+haskellPackages.PropaFP
+haskellPackages.wsdl
+ocamlPackages.github
