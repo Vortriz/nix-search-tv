@@ -94,11 +94,7 @@ func (f *NixpkgsFetcher) GetLatestRelease(ctx context.Context, md indexer.IndexM
 }
 
 func (f *NixpkgsFetcher) DownloadRelease(ctx context.Context, release string) (io.ReadCloser, error) {
-	pkgs := struct {
-		Packages map[string]json.RawMessage `json:"packages"`
-	}{
-		Packages: map[string]json.RawMessage{},
-	}
+	pkgs := indexer.Indexable{Packages: map[string]json.RawMessage{}}
 	for _, pkg := range f.pkgs {
 		pkgs.Packages[pkg] = []byte("{}")
 	}

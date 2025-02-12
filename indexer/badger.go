@@ -34,6 +34,18 @@ func NewBadger(conf BadgerConfig) (*Badger, error) {
 	}, nil
 }
 
+// Package defines fields set by the indexer during
+// indexing
+type Package struct {
+	Name string `json:"_key"`
+}
+
+// Indexable represents the internal structure of the data
+// that the indexer expects.
+type Indexable struct {
+	Packages map[string]json.RawMessage `json:"packages"`
+}
+
 func (indexer *Badger) Index(data io.Reader, indexedKeys io.Writer) error {
 	// It is possible to parse packages as a stream and
 	// show the first results quickly (basically as soon as we parsed a package)
@@ -48,9 +60,7 @@ func (indexer *Badger) Index(data io.Reader, indexedKeys io.Writer) error {
 	//
 	// Given that, I'd prefer to show the first results later, but
 	// reduce the overall indexing time.
-	pkgs := struct {
-		Packages map[string]json.RawMessage `json:"packages"`
-	}{}
+	pkgs := Indexable{}
 	err := json.NewDecoder(data).Decode(&pkgs)
 	if err != nil {
 		return fmt.Errorf("decode json: %w", err)
@@ -114,12 +124,6 @@ func (bdg *Badger) Load(pkgName string) (json.RawMessage, error) {
 
 func (bdg *Badger) Close() error {
 	return bdg.badger.Close()
-}
-
-// Package defines fields set by the indexer during
-// indexing
-type Package struct {
-	Name string `json:"_key"`
 }
 
 // injectKey appends the `_key` field into the json object.
