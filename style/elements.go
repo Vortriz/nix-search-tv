@@ -84,12 +84,35 @@ func StyleLongDescription(styler TextStyler, text string) string {
 //	leftBorder := "│ "
 //	rightBorder := " │"
 func PrintCodeBlock(content string) string {
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, "FZF_") {
+			return PrintCodeBlockV2(content)
+		}
+	}
+
 	// Determine the maximum width of the content
 	lineWidth := findMaxWidth(content) + 4 // Add padding for borders
 	topBorder := "+" + strings.Repeat("-", lineWidth-2) + "+"
 	bottomBorder := "+" + strings.Repeat("-", lineWidth-2) + "+"
 	leftBorder := "| "
 	rightBorder := " |"
+
+	block := topBorder + "\n"
+	for _, line := range strings.Split(content, "\n") {
+		paddedLine := fmt.Sprintf("%-*s", lineWidth-4, line) // Ensure lines fit inside the box
+		block += leftBorder + paddedLine + rightBorder + "\n"
+	}
+
+	return block + bottomBorder
+}
+
+func PrintCodeBlockV2(content string) string {
+	// Determine the maximum width of the content
+	lineWidth := findMaxWidth(content) + 4 // Add padding for borders
+	topBorder := "┌" + strings.Repeat("─", lineWidth-2) + "┐"
+	bottomBorder := "└" + strings.Repeat("─", lineWidth-2) + "┘"
+	leftBorder := "│ "
+	rightBorder := " │"
 
 	block := topBorder + "\n"
 	for _, line := range strings.Split(content, "\n") {
