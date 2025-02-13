@@ -6,9 +6,7 @@ import (
 
 type Package struct {
 	indexer.Package
-	// Subs    []string
-	Example map[string]any `json:"example"`
-
+	Example      Example        `json:"example"`
 	Type         string         `json:"type"`
 	Description  string         `json:"description"`
 	Declarations []Declarations `json:"declarations"`
@@ -16,6 +14,7 @@ type Package struct {
 }
 
 type Example struct {
+	Text string `json:"text"`
 }
 
 type Declarations struct {

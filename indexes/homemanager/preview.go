@@ -1,7 +1,6 @@
 package homemanager
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
@@ -12,7 +11,6 @@ import (
 func Preview(out io.Writer, pkg Package) {
 	styler := style.StyledText
 
-	// fmt.Fprint(out, styler.Red(styler.Bold(pkg.Name)))
 	fmt.Fprint(out, styleName(pkg.Name))
 	fmt.Fprint(out, "\n\n")
 
@@ -23,29 +21,20 @@ func Preview(out io.Writer, pkg Package) {
 	fmt.Fprint(out, pkg.Type)
 	fmt.Fprint(out, "\n\n")
 
-	// if len(pkg.Subs) > 0 {
-	// 	fmt.Fprint(out, styler.Bold("options"), "\n")
-
-	// 	pkg.Subs[0] = "  " + pkg.Subs[0]
-	// 	subs := strings.Join(pkg.Subs, "\n  ")
-
-	// 	fmt.Fprint(out, subs)
-	// 	fmt.Fprint(out, "\n\n")
-	// }
-	if len(pkg.Example) > 0 {
+	if pkg.Example.Text != "" {
 		fmt.Fprint(out, styler.Bold("example"), "\n")
 
-		example := style.PrintCodeBlock(pkg.Example["text"].(string))
+		example := style.PrintCodeBlock(pkg.Example.Text)
 		fmt.Fprint(out, example)
 
 		fmt.Fprint(out, "\n\n")
 	}
 
-	fmt.Fprint(out, "===========")
-	fmt.Fprint(out, "\n\n")
-	enc := json.NewEncoder(out)
-	enc.SetIndent("", "  ")
-	enc.Encode(pkg)
+	// fmt.Fprint(out, "====== Debug ======")
+	// fmt.Fprint(out, "\n\n")
+	// enc := json.NewEncoder(out)
+	// enc.SetIndent("", "  ")
+	// enc.Encode(pkg)
 }
 
 func styleName(name string) string {
