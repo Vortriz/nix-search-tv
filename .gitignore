@@ -1,3 +1,4 @@
 .dev/bin
+#integrations/**/metadata.json
 
 .direnv
