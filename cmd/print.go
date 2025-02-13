@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"slices"
 
+	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
 
 	"github.com/urfave/cli/v3"
@@ -25,48 +27,49 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("get config: %w", err)
 	}
 
-	needIndexing, mds, err := indexer.NeedIndexing(conf, conf.Indexes)
+	needIndexing, err := indexer.NeedIndexing(conf, conf.Indexes)
 	if err != nil {
 		return fmt.Errorf("check if indexing needed: %w", err)
 	}
-	if len(mds) > 0 {
+
+	if len(needIndexing) > 0 {
 		if conf.EnableWaitingMessage {
 			PrintWaiting(Stdout)
 		}
-
-		err = Index(ctx, conf, needIndexing)
-		if err != nil {
-			return err
-		}
 	}
 
-	needPrefix := len(conf.Indexes) > 1
 	for _, index := range conf.Indexes {
-		keys, err := indexer.OpenKeysReader(conf.CacheDir, index)
-		if err != nil {
-			return fmt.Errorf("failed to read %s keys: %w", index, err)
+		if !slices.Contains(needIndexing, index) {
+			err = PrintIndexKeys(index, conf)
+			if err != nil {
+				return fmt.Errorf("%s: %w", index, err)
+			}
 		}
-		defer keys.Close()
-
-		prefix := ""
-		if needPrefix {
-			prefix = index
-		}
-		if err = PrintKeys(prefix, keys); err != nil {
-			return err
-		}
+	}
+	err = Index(ctx, conf, needIndexing)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func PrintKeys(index string, pkgs io.Reader) error {
-	if index == "" {
-		_, err := io.Copy(Stdout, pkgs)
-		return err
+func PrintIndexKeys(index string, conf config.Config) error {
+	keys, err := indexer.OpenKeysReader(conf.CacheDir, index)
+	if err != nil {
+		return fmt.Errorf("read keys file: %w", err)
+	}
+	defer keys.Close()
+
+	if len(conf.Indexes) == 1 {
+		_, err := io.Copy(Stdout, keys)
+		if err != nil {
+			return fmt.Errorf("print to stdout: %w", err)
+		}
+		return nil
 	}
 
-	scanner := bufio.NewScanner(pkgs)
+	scanner := bufio.NewScanner(keys)
 	for scanner.Scan() {
 		out := addIndexPrefix(index, scanner.Text()+"\n")
 		Stdout.Write([]byte(out))

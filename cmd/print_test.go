@@ -3,6 +3,7 @@ package cmd
 import (
 	"cmp"
 	"context"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -109,9 +110,6 @@ func TestPrintIndexing(t *testing.T) {
 	t.Run("run -> no index -> indexing", func(t *testing.T) {
 		state := setup(t)
 
-		_, err := os.Stat(filepath.Join(state.CacheDir, indices.Nixpkgs))
-		assert.IsError(t, err, fs.ErrNotExist)
-
 		runPrint(t, ctx, state.CacheDir)
 
 		expectedPaths := map[string]bool{
@@ -120,7 +118,7 @@ func TestPrintIndexing(t *testing.T) {
 			"nixpkgs/cache.txt":     false,
 			"nixpkgs/metadata.json": false,
 		}
-		err = filepath.WalkDir(state.CacheDir, func(path string, d fs.DirEntry, err error) error {
+		err := filepath.WalkDir(state.CacheDir, func(path string, d fs.DirEntry, err error) error {
 			for expectedPath := range expectedPaths {
 				if strings.HasSuffix(path, expectedPath) {
 					expectedPaths[expectedPath] = true
@@ -141,9 +139,6 @@ func TestPrintIndexing(t *testing.T) {
 	t.Run("has index -> need indexing -> indexing", func(t *testing.T) {
 		state := setup(t)
 
-		_, err := os.Stat(filepath.Join(state.CacheDir, indices.Nixpkgs))
-		assert.IsError(t, err, fs.ErrNotExist)
-
 		// generate the first index
 		runPrint(t, ctx, state.CacheDir)
 
@@ -160,9 +155,6 @@ func TestPrintIndexing(t *testing.T) {
 	t.Run("has index -> indexing not needed", func(t *testing.T) {
 		state := setup(t)
 
-		_, err := os.Stat(filepath.Join(state.CacheDir, indices.Nixpkgs))
-		assert.IsError(t, err, fs.ErrNotExist)
-
 		// generate the first index
 		runPrint(t, ctx, state.CacheDir)
 
@@ -172,6 +164,16 @@ func TestPrintIndexing(t *testing.T) {
 		assert.NotPanics(t, func() {
 			runPrint(t, ctx, state.CacheDir)
 		})
+	})
+
+	t.Run("single index failed", func(t *testing.T) {
+		state := setup(t)
+
+		setFailingFetcher()
+		runPrint(t, ctx, state.CacheDir)
+
+		expected := fmt.Sprintf("%s/ indexing failed", indices.Nixpkgs)
+		assert.Contains(t, state.Stdout.String(), expected)
 	})
 
 	t.Run("need update, but not new version", func(t *testing.T) {

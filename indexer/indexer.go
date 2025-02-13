@@ -29,96 +29,106 @@ type IndexMetadata struct {
 	CurrRelease   string    `json:"curr_release"`
 }
 
+type IndexingResult struct {
+	Index string
+	Err   error
+}
+
 func RunIndexing(
 	ctx context.Context,
 	conf config.Config,
 	indexes []Index,
-) []error {
-	errs := make([]error, len(indexes))
+) <-chan IndexingResult {
+	results := make(chan IndexingResult)
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(indexes))
 
-	for i, index := range indexes {
+	for _, index := range indexes {
 		go func() {
 			defer wg.Done()
-
-			indexDir := filepath.Join(conf.CacheDir, index.Name)
-			latest, err := index.Fetcher.GetLatestRelease(ctx, index.Metadata)
-			if err != nil {
-				errs[i] = fmt.Errorf("get latest release: %w", err)
-				return
-			}
-			if latest == index.Metadata.CurrRelease {
-				_ = setIndexMetadata(indexDir, IndexMetadata{
-					LastIndexedAt: time.Now(),
-					CurrRelease:   latest,
-				})
-				return
-			}
-
-			pkgs, err := index.Fetcher.DownloadRelease(ctx, latest)
-			if err != nil {
-				errs[i] = fmt.Errorf("download latest release: %w", err)
-				return
-			}
-			defer pkgs.Close()
-
-			cache, err := CacheWriter(indexDir)
-			if err != nil {
-				errs[i] = err
-				return
-			}
-			defer cache.Close()
-
-			badgerDir := filepath.Join(indexDir, "badger")
-			indexer, err := NewBadger(BadgerConfig{
-				Dir: badgerDir,
-			})
-			if err != nil {
-				errs[i] = fmt.Errorf("open indexer: %w", err)
-				return
-			}
-			defer indexer.Close()
-
-			err = indexer.Index(pkgs, cache)
-			if err != nil {
-				errs[i] = fmt.Errorf("index packages: %w", err)
-				return
-			}
-
-			_ = setIndexMetadata(indexDir, IndexMetadata{
-				LastIndexedAt: time.Now(),
-				CurrRelease:   latest,
-			})
+			err := runIndex(ctx, conf, index)
+			results <- IndexingResult{index.Name, err}
 		}()
 	}
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
 
-	wg.Wait()
+	return results
+}
 
-	return errs
+func runIndex(
+	ctx context.Context,
+	conf config.Config,
+	index Index,
+) error {
+	indexDir := filepath.Join(conf.CacheDir, index.Name)
+	latest, err := index.Fetcher.GetLatestRelease(ctx, index.Metadata)
+	if err != nil {
+		return fmt.Errorf("get latest release: %w", err)
+	}
+	if latest == index.Metadata.CurrRelease {
+		_ = setIndexMetadata(indexDir, IndexMetadata{
+			LastIndexedAt: time.Now(),
+			CurrRelease:   latest,
+		})
+		return nil
+	}
+
+	pkgs, err := index.Fetcher.DownloadRelease(ctx, latest)
+	if err != nil {
+		return fmt.Errorf("download latest release: %w", err)
+	}
+	defer pkgs.Close()
+
+	cache, err := CacheWriter(indexDir)
+	if err != nil {
+		return fmt.Errorf("open cache write: %w", err)
+	}
+	defer cache.Close()
+
+	badgerDir := filepath.Join(indexDir, "badger")
+	indexer, err := NewBadger(BadgerConfig{
+		Dir: badgerDir,
+	})
+	if err != nil {
+		return fmt.Errorf("open indexer: %w", err)
+	}
+	defer indexer.Close()
+
+	err = indexer.Index(pkgs, cache)
+	if err != nil {
+		return fmt.Errorf("index packages: %w", err)
+	}
+
+	_ = setIndexMetadata(indexDir, IndexMetadata{
+		LastIndexedAt: time.Now(),
+		CurrRelease:   latest,
+	})
+
+	return nil
 }
 
 func NeedIndexing(
 	conf config.Config,
 	indexes []string,
-) ([]string, []IndexMetadata, error) {
-	mds := []IndexMetadata{}
+) ([]string, error) {
 	needIndex := []string{}
 
 	for _, index := range indexes {
 		indexDir := filepath.Join(conf.CacheDir, index)
 		md, err := getIndexMetadata(indexDir)
 		if err != nil {
-			return nil, nil, fmt.Errorf("get metadata: %w", err)
+			return nil, fmt.Errorf("get metadata: %w", err)
 		}
 		if time.Since(md.LastIndexedAt) > time.Duration(conf.UpdateInterval) {
-			mds = append(mds, md)
 			needIndex = append(needIndex, index)
 		}
 	}
 
-	return needIndex, mds, nil
+	return needIndex, nil
 }
 
 func OpenKeysReader(cacheDir, index string) (io.ReadCloser, error) {

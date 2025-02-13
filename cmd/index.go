@@ -28,17 +28,23 @@ func Index(ctx context.Context, conf config.Config, indexNames []string) error {
 		})
 	}
 
-	errs := indexer.RunIndexing(ctx, conf, indexes)
-	success := false
-	for _, err := range errs {
-		if err == nil {
-			success = true
+	results := indexer.RunIndexing(ctx, conf, indexes)
+	for result := range results {
+		if result.Err != nil {
+			msg := addIndexPrefix(
+				result.Index,
+				fmt.Sprintf("indexing failed: %s\n", result.Err),
+			)
+			Stdout.Write([]byte(msg))
 			continue
 		}
+
+		err := PrintIndexKeys(result.Index, conf)
+		if err != nil {
+			return err
+		}
 	}
-	if !success {
-		return fmt.Errorf("all indexes failed: %w", errs[0])
-	}
+
 	return nil
 }
 

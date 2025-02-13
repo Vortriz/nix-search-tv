@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -83,6 +84,22 @@ func setNixpkgs(pkgs ...string) {
 			pkgs: pkgs,
 		},
 	}
+}
+
+func setFailingFetcher() {
+	Fetchers = map[string]indexer.Fetcher{
+		indices.Nixpkgs: &FailFetcher{},
+	}
+}
+
+type FailFetcher struct{}
+
+func (f *FailFetcher) GetLatestRelease(ctx context.Context, md indexer.IndexMetadata) (string, error) {
+	return "", errors.New("failed to get latest release")
+}
+
+func (f *FailFetcher) DownloadRelease(ctx context.Context, release string) (io.ReadCloser, error) {
+	return nil, errors.New("failed to download the release")
 }
 
 type NixpkgsFetcher struct {
