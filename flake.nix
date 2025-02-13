@@ -57,7 +57,7 @@
           src = self;
 
           # vendorHash = nixpkgs.lib.fakeHash;
-          vendorHash = "sha256-uzNDhkovlXx0tIgSJ3E08d0TNmktSrlOOe8Iwi4ZfmU=";
+          vendorHash = "sha256-0spLr6Qn2eQZC5Wwe6d+0o6B3r9CIgJt2X5/E/UMvg8=";
 
           subPackages = [cmdPkg];
 

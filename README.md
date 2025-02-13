@@ -1,6 +1,6 @@
 # nix-search-tv
 
-An integration between [television](https://github.com/alexpasmantier/television) and [nix-search](https://github.com/diamondburned/nix-search)
+Fuzzy search for NixOS packages.
 
 [![asciicast](https://asciinema.org/a/AUt4rfSukwSWsrlis7ZNsBP4N.svg)](https://asciinema.org/a/AUt4rfSukwSWsrlis7ZNsBP4N)
 
@@ -48,17 +48,12 @@ go install ./cmd/nix-search-tv
 
 ## Usage
 
-Once nix-search-tv is installed, first index the Nixpkgs:
+`nix-search-tv` does not do the search by itself, but rather integrates
+with other general purpose fuzzy finders, such as [television](https://github.com/alexpasmantier/television) and [fzf](https://github.com/junegunn/fzf)
 
-```sh
-nix-search-tv index
+### Television
 
-# or
-
-nix-search-tv index --flake nixpkgs
-```
-
-Then, add `nix_channels.toml` file to your television config directory with the content below:
+Add `nix_channels.toml` file to your television config directory with the content below:
 
 ```toml
 [[cable_channel]]
@@ -66,6 +61,19 @@ name = "nixpkgs"
 source_command = "nix-search-tv print"
 preview_command = "nix-search-tv preview {}"
 ```
+
+### fzf
+
+The most straightforward integration might look like:
+
+```sh
+alias ns="nix-search-tv print | fzf --preview 'nix-search-tv preview {}'"
+```
+
+## Searchable package registries (so far)
+
+- [Nixpkgs](https://search.nixos.org/packages?channel=unstable) (without NixOS options)
+- [Home Manager](https://github.com/nix-community/home-manager)
 
 ## Credits
 
