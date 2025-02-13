@@ -47,7 +47,7 @@ func TestIntegrations(t *testing.T) {
 		return fmt.Sprintf("%s preview %s {1}{2}", binPath, searchFlags)
 	}
 	tvPreview := func(searchFlags string) string {
-		return fmt.Sprintf("echo {} | awk \"{ print $1$2 }\" | xargs %s preview %s", binPath, searchFlags)
+		return fmt.Sprintf("%s preview %s {}", binPath, searchFlags)
 	}
 
 	t.Run("single", func(t *testing.T) {
