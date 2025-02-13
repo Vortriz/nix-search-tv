@@ -70,6 +70,34 @@ The most straightforward integration might look like:
 alias ns="nix-search-tv print | fzf --preview 'nix-search-tv preview {}'"
 ```
 
+## Configuration
+
+By default, the configuration file is looked at `$XDG_CONFIG_HOME/nix-search-tv/config.json`
+
+```jsonc
+{
+  // What indexes to search by default
+  //
+  // default: nixpkgs
+  "indexes": ["nixpkgs", "home-manager"],
+
+  // How often to look for updates and run
+  // indexer again
+  //
+  // default: 1 week (168h)
+  "update_interval": "3h2m1s",
+
+  // Where to store the index files
+  //
+  // default: $XDG_CACHE_HOME/nix-search-tv
+  "cache_dir": "path/to/cache/dir",
+
+  // Whether to show the banner when waiting for
+  // the indexing
+  "enable_waiting_message": true
+}
+```
+
 ## Searchable package registries (so far)
 
 - [Nixpkgs](https://search.nixos.org/packages?channel=unstable) (without NixOS options)
