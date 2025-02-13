@@ -2,7 +2,7 @@
 
 Fuzzy search for NixOS packages.
 
-[![asciicast](https://asciinema.org/a/AUt4rfSukwSWsrlis7ZNsBP4N.svg)](https://asciinema.org/a/AUt4rfSukwSWsrlis7ZNsBP4N)
+[![asciicast](https://asciinema.org/a/afNYMXrhoEwwh3wzOK7FbsFtW.svg)](https://asciinema.org/a/afNYMXrhoEwwh3wzOK7FbsFtW)
 
 ## Installation
 
