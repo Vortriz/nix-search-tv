@@ -2,12 +2,16 @@ package integrations_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 	"text/template"
 	"time"
+
+	"github.com/3timeslazy/nix-search-tv/indexer"
+	"github.com/3timeslazy/nix-search-tv/indexes/indices"
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/jubnzv/go-tmux"
@@ -21,6 +25,17 @@ func TestIntegrations(t *testing.T) {
 	dataDir, err := filepath.Abs("./testdata")
 	assert.NoError(t, err)
 	cacheDir := filepath.Join(dataDir, "cache")
+
+	// Set metadata to time.Now, because otherwise the program
+	// will start indexing packages
+	for _, index := range []string{indices.Nixpkgs, indices.HomeManager} {
+		nixpkgsMdFile := filepath.Join(cacheDir, index, "metadata.json")
+		nixpkgsMd := indexer.IndexMetadata{LastIndexedAt: time.Now()}
+		data, err := json.Marshal(nixpkgsMd)
+		assert.NoError(t, err)
+		err = os.WriteFile(nixpkgsMdFile, data, 0666)
+		assert.NoError(t, err)
+	}
 
 	expected := func(t *testing.T, name string) string {
 		expectedPath := filepath.Join(dataDir, "cases", name+".txt")
