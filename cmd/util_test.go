@@ -80,9 +80,12 @@ func getCache(t *testing.T, state state) []string {
 
 func setNixpkgs(pkgs ...string) {
 	Fetchers = map[string]indexer.Fetcher{
-		indices.Nixpkgs: &NixpkgsFetcher{
+		indices.Nixpkgs: &PkgsFetcher{
 			pkgs: pkgs,
 		},
+		// TODO: move into a `setHomeManager` once
+		// it's needed
+		indices.HomeManager: &PkgsFetcher{},
 	}
 }
 
@@ -102,15 +105,15 @@ func (f *FailFetcher) DownloadRelease(ctx context.Context, release string) (io.R
 	return nil, errors.New("failed to download the release")
 }
 
-type NixpkgsFetcher struct {
+type PkgsFetcher struct {
 	pkgs []string
 }
 
-func (f *NixpkgsFetcher) GetLatestRelease(ctx context.Context, md indexer.IndexMetadata) (string, error) {
-	return indices.Nixpkgs, nil
+func (f *PkgsFetcher) GetLatestRelease(ctx context.Context, md indexer.IndexMetadata) (string, error) {
+	return "latest", nil
 }
 
-func (f *NixpkgsFetcher) DownloadRelease(ctx context.Context, release string) (io.ReadCloser, error) {
+func (f *PkgsFetcher) DownloadRelease(ctx context.Context, release string) (io.ReadCloser, error) {
 	pkgs := indexer.Indexable{Packages: map[string]json.RawMessage{}}
 	for _, pkg := range f.pkgs {
 		pkgs.Packages[pkg] = []byte("{}")

@@ -103,7 +103,7 @@ func defaults() Config {
 		CacheDir:             cacheDir,
 		EnableWaitingMessage: true,
 		// TODO: use constants from the indexes package
-		Indexes: []string{"nixpkgs"},
+		Indexes: []string{"nixpkgs", "home-manager"},
 	}
 }
 

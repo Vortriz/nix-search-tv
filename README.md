@@ -78,7 +78,7 @@ By default, the configuration file is looked at `$XDG_CONFIG_HOME/nix-search-tv/
 {
   // What indexes to search by default
   //
-  // default: nixpkgs
+  // default: [nixpkgs, "home-manager"]
   "indexes": ["nixpkgs", "home-manager"],
 
   // How often to look for updates and run
@@ -94,6 +94,8 @@ By default, the configuration file is looked at `$XDG_CONFIG_HOME/nix-search-tv/
 
   // Whether to show the banner when waiting for
   // the indexing
+  //
+  // default: true
   "enable_waiting_message": true
 }
 ```
