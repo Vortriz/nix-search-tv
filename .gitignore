@@ -1,4 +1,6 @@
 .dev/bin
-#integrations/**/metadata.json
+
+integrations/**/metadata.json
+integrations/**/*.vlog
 
 .direnv
