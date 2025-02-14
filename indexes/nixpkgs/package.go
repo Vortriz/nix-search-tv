@@ -24,6 +24,7 @@ type Meta struct {
 	Broken          bool                 `json:"broken"`
 	Unfree          bool                 `json:"unfree"`
 	Name            string               `json:"name"`
+	Position        string               `json:"position"`
 }
 
 type License struct {
@@ -99,4 +100,14 @@ func (pkg *Package) GetVersion() string {
 
 	// TODO: comment about nvidia-docker
 	return strings.TrimPrefix(pkg.Meta.Name, pkg.Name+"-")
+}
+
+func (pkg *Package) GetSource() string {
+	src := pkg.Meta.Position
+	if src == "" {
+		return src
+	}
+
+	src, _, _ = strings.Cut(src, ":")
+	return "https://github.com/NixOS/nixpkgs/blob/nixos-unstable/" + src
 }

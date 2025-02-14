@@ -141,27 +141,20 @@ func OpenKeysReader(cacheDir, index string) (io.ReadCloser, error) {
 	return os.OpenFile(path, os.O_RDONLY, 0666)
 }
 
-func LoadKey[T any](conf config.Config, index, key string) (T, error) {
-	var pkg T
-
+func LoadKey(conf config.Config, index, key string) (json.RawMessage, error) {
 	badgerDir := filepath.Join(conf.CacheDir, index, "badger")
 	indexer, err := NewBadger(BadgerConfig{
 		Dir: badgerDir,
 	})
 	if err != nil {
-		return pkg, fmt.Errorf("open indexer: %w", err)
+		return nil, fmt.Errorf("open indexer: %w", err)
 	}
 	defer indexer.Close()
 
 	data, err := indexer.Load(key)
 	if err != nil {
-		return pkg, fmt.Errorf("load key: %w", err)
+		return nil, fmt.Errorf("load key: %w", err)
 	}
 
-	err = json.Unmarshal(data, &pkg)
-	if err != nil {
-		return pkg, fmt.Errorf("decode package: %w", err)
-	}
-
-	return pkg, nil
+	return data, nil
 }

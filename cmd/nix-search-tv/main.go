@@ -19,6 +19,7 @@ var root = &cli.Command{
 	Commands: []*cli.Command{
 		cmd.Print,
 		cmd.Preview,
+		cmd.Source,
 	},
 }
 

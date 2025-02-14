@@ -7,10 +7,11 @@
 package indices
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
-	"os"
+	"io"
 
-	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
 	"github.com/3timeslazy/nix-search-tv/indexes/homemanager"
 	"github.com/3timeslazy/nix-search-tv/indexes/nixpkgs"
@@ -31,23 +32,49 @@ var Fetchers = map[string]indexer.Fetcher{
 	HomeManager: &homemanager.Fetcher{},
 }
 
-var Previews = map[string]func(config.Config, string) error{
-	Nixpkgs: func(conf config.Config, pkgName string) error {
-		pkg, err := indexer.LoadKey[nixpkgs.Package](conf, Nixpkgs, pkgName)
-		if err != nil {
-			return fmt.Errorf("load package content: %w", err)
+func Preview(out io.Writer, index string, pkg json.RawMessage) error {
+	switch index {
+	case Nixpkgs:
+		nixpkg := nixpkgs.Package{}
+		if err := json.Unmarshal(pkg, &nixpkg); err != nil {
+			return fmt.Errorf("unmarshal package: %w", err)
 		}
+		nixpkgs.Preview(out, nixpkg)
 
-		nixpkgs.Preview(os.Stdout, pkg)
-		return nil
-	},
-	HomeManager: func(conf config.Config, pkgName string) error {
-		pkg, err := indexer.LoadKey[homemanager.Package](conf, HomeManager, pkgName)
-		if err != nil {
-			return fmt.Errorf("load package content: %w", err)
+	case HomeManager:
+		hmpkg := homemanager.Package{}
+		if err := json.Unmarshal(pkg, &hmpkg); err != nil {
+			return fmt.Errorf("unmarshal package: %w", err)
 		}
+		homemanager.Preview(out, hmpkg)
 
-		homemanager.Preview(os.Stdout, pkg)
-		return nil
-	},
+	default:
+		return errors.New("unknown index")
+	}
+
+	return nil
+}
+
+func SourcePreview(out io.Writer, index string, pkg json.RawMessage) error {
+	var src interface {
+		GetSource() string
+	}
+
+	switch index {
+	case Nixpkgs:
+		src = &nixpkgs.Package{}
+
+	case HomeManager:
+		src = &homemanager.Package{}
+
+	default:
+		return errors.New("unknown index")
+	}
+
+	if err := json.Unmarshal(pkg, &src); err != nil {
+		return fmt.Errorf("unmarshal package: %w", err)
+	}
+
+	_, err := out.Write([]byte(src.GetSource()))
+	return err
 }
