@@ -25,6 +25,7 @@ type Meta struct {
 	Unfree          bool                 `json:"unfree"`
 	Name            string               `json:"name"`
 	Position        string               `json:"position"`
+	Platforms       []string             `json:"platforms"`
 }
 
 type License struct {
