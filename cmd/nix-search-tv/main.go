@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/signal"
 
 	"github.com/3timeslazy/nix-search-tv/cmd"
 
-	"github.com/hashicorp/go-hclog"
 	"github.com/urfave/cli/v3"
 )
 
@@ -35,8 +35,7 @@ func main() {
 			code = codeError.ExitCode()
 		}
 
-		log := hclog.FromContext(ctx)
-		log.Error("error", "err", err)
+		fmt.Println("error", err)
 
 		os.Exit(code)
 	}
