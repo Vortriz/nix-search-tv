@@ -4,3 +4,4 @@ integrations/**/metadata.json
 integrations/**/*.vlog
 
 .direnv
+.DS_Store
