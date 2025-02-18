@@ -4,8 +4,6 @@ import (
 	"cmp"
 	"fmt"
 	"io"
-	"runtime"
-	"slices"
 	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/indexes/textutil"
@@ -62,11 +60,10 @@ func Preview(out io.Writer, pkg Package) {
 	if len(pkg.Meta.Platforms) > 0 {
 		platforms = textutil.Prop(
 			"platforms", "",
-			platformsString(pkg.Meta.Platforms),
+			textutil.Platforms(pkg.Meta.Platforms),
 		)
 		fmt.Fprintln(out, platforms)
 	}
-
 }
 
 func licensesString(ls []License) string {
@@ -81,46 +78,3 @@ func licensesString(ls []License) string {
 
 	return strings.Join(ss, "\n")
 }
-
-var printablePlatforms = []string{
-	"x86_64-linux",
-	"aarch64-linux",
-	"i686-linux",
-	"x86_64-darwin",
-	"aarch64-darwin",
-}
-
-func platformsString(ps []string) string {
-	toPrint := []string{}
-	cp := currentPlatform()
-
-	// iterate in order printablePlatforms->ps and not
-	// vise versa to always print platforms in the same order
-	// without sorting
-	for _, printable := range printablePlatforms {
-		if !slices.Contains(ps, printable) {
-			continue
-		}
-		if printable != cp {
-			printable = style.StyledText.Dim(printable)
-		}
-		toPrint = append(toPrint, printable)
-	}
-
-	return strings.Join(toPrint, "\n")
-}
-
-var go2nixArch = map[string]string{
-	"arm64": "aarch64",
-	"amd64": "x86_64",
-}
-
-func currentPlatform() string {
-	arch := go2nixArch[runtime.GOARCH]
-	kern := runtime.GOOS
-	return arch + "-" + kern
-}
-
-
-
-
