@@ -14,6 +14,7 @@ import (
 
 	"github.com/3timeslazy/nix-search-tv/indexer"
 	"github.com/3timeslazy/nix-search-tv/indexes/homemanager"
+	"github.com/3timeslazy/nix-search-tv/indexes/nixos"
 	"github.com/3timeslazy/nix-search-tv/indexes/nixpkgs"
 	"github.com/3timeslazy/nix-search-tv/indexes/nur"
 )
@@ -22,18 +23,21 @@ const (
 	Nixpkgs     = "nixpkgs"
 	HomeManager = "home-manager"
 	Nur         = "nur"
+	NixOS       = "nixos"
 )
 
 var Indexes = map[string]bool{
 	Nixpkgs:     true,
 	HomeManager: true,
 	Nur:         true,
+	NixOS:       true,
 }
 
 var Fetchers = map[string]indexer.Fetcher{
 	Nixpkgs:     &nixpkgs.Fetcher{},
 	HomeManager: &homemanager.Fetcher{},
 	Nur:         &nur.Fetcher{},
+	NixOS:       &nixos.Fetcher{},
 }
 
 func Preview(out io.Writer, index string, pkg json.RawMessage) error {
@@ -59,6 +63,13 @@ func Preview(out io.Writer, index string, pkg json.RawMessage) error {
 		}
 		nur.Preview(out, nurpkg)
 
+	case NixOS:
+		nixospkg := nixos.Package{}
+		if err := json.Unmarshal(pkg, &nixospkg); err != nil {
+			return fmt.Errorf("unmarshal package: %w", err)
+		}
+		nixos.Preview(out, nixospkg)
+
 	default:
 		return errors.New("unknown index")
 	}
@@ -80,6 +91,9 @@ func SourcePreview(out io.Writer, index string, pkg json.RawMessage) error {
 
 	case Nur:
 		src = &nur.Package{}
+
+	case NixOS:
+		src = &nixos.Package{}
 
 	default:
 		return errors.New("unknown index")
