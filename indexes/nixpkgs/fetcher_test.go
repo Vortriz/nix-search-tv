@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/3timeslazy/nix-search-tv/indexer"
+	"github.com/3timeslazy/nix-search-tv/indexes/readutil"
 	"github.com/alecthomas/assert/v2"
 )
 
@@ -26,7 +27,7 @@ func TestFetcherOutput(t *testing.T) {
 
 	pkgs, err := os.Open("./testdata/packages.json.br")
 	assert.NoError(t, err)
-	pkgsbr := newBrotli(pkgs)
+	pkgsbr := readutil.NewBrotli(pkgs)
 	defer pkgsbr.Close()
 
 	expectedKeys, err := os.ReadFile("./testdata/keys.txt")

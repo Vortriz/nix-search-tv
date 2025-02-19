@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/indexer"
+	"github.com/3timeslazy/nix-search-tv/indexes/readutil"
 
-	"github.com/andybalholm/brotli"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -63,25 +63,5 @@ func (f *Fetcher) DownloadRelease(ctx context.Context, release string) (io.ReadC
 		return nil, fmt.Errorf("expected http 200, but %d", resp.StatusCode)
 	}
 
-	return newBrotli(resp.Body), nil
-}
-
-type brotliReadCloser struct {
-	rd  io.ReadCloser
-	brd *brotli.Reader
-}
-
-func newBrotli(rd io.ReadCloser) *brotliReadCloser {
-	return &brotliReadCloser{
-		rd:  rd,
-		brd: brotli.NewReader(rd),
-	}
-}
-
-func (br *brotliReadCloser) Close() error {
-	return br.rd.Close()
-}
-
-func (br *brotliReadCloser) Read(p []byte) (n int, err error) {
-	return br.brd.Read(p)
+	return readutil.NewBrotli(resp.Body), nil
 }
