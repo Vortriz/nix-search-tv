@@ -15,6 +15,8 @@ import (
 )
 
 func TestFetcherOutput(t *testing.T) {
+	t.Parallel()
+
 	indexer, err := indexer.NewBadger(indexer.BadgerConfig{
 		InMemory: true,
 	})

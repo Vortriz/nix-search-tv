@@ -20,7 +20,8 @@ import (
 // To generate the expected keys from the packages.json, use:
 //   - cat options.json | jq -r 'keys []' > keys.txt
 func TestFetcherOutput(t *testing.T) {
-	// return
+	t.Parallel()
+
 	indexer, err := indexer.NewBadger(indexer.BadgerConfig{
 		InMemory: true,
 	})

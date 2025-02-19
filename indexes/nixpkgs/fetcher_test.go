@@ -19,6 +19,8 @@ import (
 // To generate the expected keys from the packages.json, use:
 //   - cat packages.json.br | brotli -d | jq '.packages | keys []' | tr -d '"' > keys.txt
 func TestFetcherOutput(t *testing.T) {
+	t.Parallel()
+
 	indexer, err := indexer.NewBadger(indexer.BadgerConfig{
 		InMemory: true,
 	})
