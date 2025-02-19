@@ -30,6 +30,10 @@ type Default struct {
 }
 
 func (pkg *Package) GetSource() string {
+	if len(pkg.Declarations) == 1 {
+		return pkg.Declarations[0].URL
+	}
+
 	// Home Manager options might have multiple declarations, so
 	// return the link to the official documentation with all the links
 	return fmt.Sprintf(
