@@ -13,6 +13,7 @@ import (
 	"io"
 
 	"github.com/3timeslazy/nix-search-tv/indexer"
+	"github.com/3timeslazy/nix-search-tv/indexes/darwin"
 	"github.com/3timeslazy/nix-search-tv/indexes/homemanager"
 	"github.com/3timeslazy/nix-search-tv/indexes/nixos"
 	"github.com/3timeslazy/nix-search-tv/indexes/nixpkgs"
@@ -24,6 +25,7 @@ const (
 	HomeManager = "home-manager"
 	Nur         = "nur"
 	NixOS       = "nixos"
+	Darwin      = "darwin"
 )
 
 var Indexes = map[string]bool{
@@ -31,6 +33,7 @@ var Indexes = map[string]bool{
 	HomeManager: true,
 	Nur:         true,
 	NixOS:       true,
+	Darwin:      true,
 }
 
 var Fetchers = map[string]indexer.Fetcher{
@@ -38,6 +41,7 @@ var Fetchers = map[string]indexer.Fetcher{
 	HomeManager: &homemanager.Fetcher{},
 	Nur:         &nur.Fetcher{},
 	NixOS:       &nixos.Fetcher{},
+	Darwin:      &darwin.Fetcher{},
 }
 
 func Preview(out io.Writer, index string, pkg json.RawMessage) error {
@@ -70,6 +74,13 @@ func Preview(out io.Writer, index string, pkg json.RawMessage) error {
 		}
 		nixos.Preview(out, nixospkg)
 
+	case Darwin:
+		dpkg := darwin.Package{}
+		if err := json.Unmarshal(pkg, &dpkg); err != nil {
+			return fmt.Errorf("unmarshal package: %w", err)
+		}
+		darwin.Preview(out, dpkg)
+
 	default:
 		return errors.New("unknown index")
 	}
@@ -94,6 +105,9 @@ func SourcePreview(out io.Writer, index string, pkg json.RawMessage) error {
 
 	case NixOS:
 		src = &nixos.Package{}
+
+	case Darwin:
+		src = &darwin.Package{}
 
 	default:
 		return errors.New("unknown index")
