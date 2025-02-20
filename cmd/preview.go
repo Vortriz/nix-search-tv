@@ -53,7 +53,7 @@ func NewPreviewAction(preview PreviewFunc) cli.ActionFunc {
 			}
 		}
 
-		pkg, err := indexer.LoadKey(conf, index, pkgName)
+		pkg, err := indexer.LoadKey(conf.CacheDir, index, pkgName)
 		if err != nil {
 			return fmt.Errorf("load package content: %w", err)
 		}

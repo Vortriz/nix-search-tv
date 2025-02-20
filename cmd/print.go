@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"time"
 
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
@@ -27,7 +28,11 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("get config: %w", err)
 	}
 
-	needIndexing, err := indexer.NeedIndexing(conf, conf.Indexes)
+	needIndexing, err := indexer.NeedIndexing(
+		conf.CacheDir,
+		time.Duration(conf.UpdateInterval),
+		conf.Indexes,
+	)
 	if err != nil {
 		return fmt.Errorf("check if indexing needed: %w", err)
 	}

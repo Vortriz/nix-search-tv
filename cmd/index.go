@@ -28,7 +28,7 @@ func Index(ctx context.Context, conf config.Config, indexNames []string) error {
 		})
 	}
 
-	results := indexer.RunIndexing(ctx, conf, indexes)
+	results := indexer.RunIndexing(ctx, conf.CacheDir, indexes)
 	for result := range results {
 		if result.Err != nil {
 			msg := addIndexPrefix(

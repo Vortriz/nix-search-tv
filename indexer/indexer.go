@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-
-	"github.com/3timeslazy/nix-search-tv/config"
 )
 
 type Fetcher interface {
@@ -36,7 +34,7 @@ type IndexingResult struct {
 
 func RunIndexing(
 	ctx context.Context,
-	conf config.Config,
+	cacheDir string,
 	indexes []Index,
 ) <-chan IndexingResult {
 	results := make(chan IndexingResult)
@@ -47,7 +45,7 @@ func RunIndexing(
 	for _, index := range indexes {
 		go func() {
 			defer wg.Done()
-			err := runIndex(ctx, conf, index)
+			err := runIndex(ctx, cacheDir, index)
 			results <- IndexingResult{index.Name, err}
 		}()
 	}
@@ -61,10 +59,10 @@ func RunIndexing(
 
 func runIndex(
 	ctx context.Context,
-	conf config.Config,
+	cacheDir string,
 	index Index,
 ) error {
-	indexDir := filepath.Join(conf.CacheDir, index.Name)
+	indexDir := filepath.Join(cacheDir, index.Name)
 	latest, err := index.Fetcher.GetLatestRelease(ctx, index.Metadata)
 	if err != nil {
 		return fmt.Errorf("get latest release: %w", err)
@@ -112,18 +110,19 @@ func runIndex(
 }
 
 func NeedIndexing(
-	conf config.Config,
+	cacheDir string,
+	updateInterval time.Duration,
 	indexes []string,
 ) ([]string, error) {
 	needIndex := []string{}
 
 	for _, index := range indexes {
-		indexDir := filepath.Join(conf.CacheDir, index)
+		indexDir := filepath.Join(cacheDir, index)
 		md, err := getIndexMetadata(indexDir)
 		if err != nil {
 			return nil, fmt.Errorf("get metadata: %w", err)
 		}
-		if time.Since(md.LastIndexedAt) > time.Duration(conf.UpdateInterval) {
+		if time.Since(md.LastIndexedAt) > time.Duration(updateInterval) {
 			needIndex = append(needIndex, index)
 		}
 	}
@@ -141,8 +140,8 @@ func OpenKeysReader(cacheDir, index string) (io.ReadCloser, error) {
 	return os.OpenFile(path, os.O_RDONLY, 0666)
 }
 
-func LoadKey(conf config.Config, index, key string) (json.RawMessage, error) {
-	badgerDir := filepath.Join(conf.CacheDir, index, "badger")
+func LoadKey(cacheDir, index, key string) (json.RawMessage, error) {
+	badgerDir := filepath.Join(cacheDir, index, "badger")
 	indexer, err := NewBadger(BadgerConfig{
 		Dir: badgerDir,
 	})

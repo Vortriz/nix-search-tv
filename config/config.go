@@ -8,7 +8,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
+
+	"github.com/3timeslazy/nix-search-tv/indexes/indices"
 )
 
 // Config represents configuration options stored in the
@@ -98,12 +101,20 @@ func defaults() Config {
 		// what environment does not have $HOME?
 		panic(err)
 	}
+
+	indexes := []string{indices.Nixpkgs, indices.HomeManager, indices.Nur}
+	if runtime.GOOS == "linux" {
+		indexes = append(indexes, indices.NixOS)
+	}
+	if runtime.GOOS == "darwin" {
+		indexes = append(indexes, indices.Darwin)
+	}
+
 	return Config{
 		UpdateInterval:       Duration(time.Hour * 24 * 7),
 		CacheDir:             cacheDir,
 		EnableWaitingMessage: true,
-		// TODO: use constants from the indexes package
-		Indexes: []string{"nixpkgs", "home-manager"},
+		Indexes:              indexes,
 	}
 }
 
