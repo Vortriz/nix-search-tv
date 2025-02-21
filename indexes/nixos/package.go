@@ -35,3 +35,7 @@ func (pkg *Package) GetSource() string {
 		pkg.Name,
 	)
 }
+
+func (pkg *Package) GetHomepage() string {
+	return pkg.GetSource()
+}

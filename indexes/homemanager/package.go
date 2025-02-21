@@ -45,3 +45,7 @@ func (pkg *Package) GetSource() string {
 		strings.ReplaceAll(pkg.Name, `"`, "_"),
 	)
 }
+
+func (pkg *Package) GetHomepage() string {
+	return pkg.GetSource()
+}

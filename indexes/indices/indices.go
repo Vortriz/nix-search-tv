@@ -120,3 +120,36 @@ func SourcePreview(out io.Writer, index string, pkg json.RawMessage) error {
 	_, err := out.Write([]byte(src.GetSource()))
 	return err
 }
+
+func HomepagePreview(out io.Writer, index string, pkg json.RawMessage) error {
+	var src interface {
+		GetHomepage() string
+	}
+
+	switch index {
+	case Nixpkgs:
+		src = &nixpkgs.Package{}
+
+	case HomeManager:
+		src = &homemanager.Package{}
+
+	case Nur:
+		src = &nur.Package{}
+
+	case NixOS:
+		src = &nixos.Package{}
+
+	case Darwin:
+		src = &darwin.Package{}
+
+	default:
+		return errors.New("unknown index")
+	}
+
+	if err := json.Unmarshal(pkg, &src); err != nil {
+		return fmt.Errorf("unmarshal package: %w", err)
+	}
+
+	_, err := out.Write([]byte(src.GetHomepage()))
+	return err
+}

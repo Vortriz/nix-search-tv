@@ -112,3 +112,11 @@ func (pkg *Package) GetSource() string {
 	src, _, _ = strings.Cut(src, ":")
 	return "https://github.com/NixOS/nixpkgs/blob/nixos-unstable/" + src
 }
+
+func (pkg *Package) GetHomepage() string {
+	if len(pkg.Meta.Homepages) > 0 {
+		return pkg.Meta.Homepages[0]
+	}
+
+	return pkg.GetSource()
+}

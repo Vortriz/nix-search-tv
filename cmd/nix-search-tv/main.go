@@ -20,6 +20,7 @@ var root = &cli.Command{
 		cmd.Print,
 		cmd.Preview,
 		cmd.Source,
+		cmd.Homepage,
 	},
 }
 
@@ -35,7 +36,7 @@ func main() {
 			code = codeError.ExitCode()
 		}
 
-		fmt.Println("error", err)
+		fmt.Println(err)
 
 		os.Exit(code)
 	}
