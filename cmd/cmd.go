@@ -7,6 +7,7 @@ import (
 	"maps"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexes/indices"
@@ -29,15 +30,6 @@ func BaseFlags() []cli.Flag {
 		&cli.StringSliceFlag{
 			Name:  IndexesFlag,
 			Usage: "what packages to index",
-			Validator: func(indexNames []string) error {
-				for _, ind := range indexNames {
-					if !indices.Indexes[ind] {
-						avail := slices.Collect(maps.Keys(indices.Indexes))
-						return fmt.Errorf("unknown index %q. Available options are: %v", ind, avail)
-					}
-				}
-				return nil
-			},
 		},
 		&cli.StringFlag{
 			Name:   CacheDirFlag,
@@ -75,9 +67,24 @@ func GetConfig(cmd *cli.Command) (config.Config, error) {
 		conf.CacheDir = cmd.String(CacheDirFlag)
 	}
 
+	if err = validateIndexes(conf.Indexes); err != nil {
+		return config.Config{}, err
+	}
+
 	if err := os.MkdirAll(conf.CacheDir, 0755); err != nil {
 		return conf, fmt.Errorf("cannot create cache directory: %w", err)
 	}
 
 	return conf, nil
+}
+
+func validateIndexes(indexes []string) error {
+	for _, ind := range indexes {
+		if !indices.Indexes[ind] {
+			avail := slices.Collect(maps.Keys(indices.Indexes))
+			str := strings.Join(avail, "\n  ")
+			return fmt.Errorf("unknown index %q. Valid values are:\n  %s", ind, str)
+		}
+	}
+	return nil
 }
