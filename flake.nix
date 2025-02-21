@@ -56,8 +56,12 @@
           version = self.rev or "unknown";
           src = self;
 
+          # If `nix shell` fails with "go: inconsistent vendoring", that's
+          # likely due to outdated `vendorHash`.
+          #
+          # To find the new hash, uncomment below:
           # vendorHash = nixpkgs.lib.fakeHash;
-          vendorHash = "sha256-0spLr6Qn2eQZC5Wwe6d+0o6B3r9CIgJt2X5/E/UMvg8=";
+          vendorHash = "sha256-hgZWppiy+P3BfoKOMClzCot1shKcGTZnsMCJ/ItxckE=";
 
           subPackages = [cmdPkg];
 
