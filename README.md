@@ -6,6 +6,12 @@ Fuzzy search for NixOS packages.
 
 ## Installation
 
+### Nix Package
+
+```nix
+environment.systemPackages = [ nix-search-tv ]
+```
+
 ### Flake
 
 There are many ways how one can install a package from a flake, below is one:
@@ -70,6 +76,16 @@ The most straightforward integration might look like:
 alias ns="nix-search-tv print | fzf --preview 'nix-search-tv preview {}'"
 ```
 
+More advanced integration that lets you filter by a package registry and open the homepage and source code can be found in [nixpkgs.sh](./nixpkgs.sh). It can be istalled as:
+
+```sh
+let
+  ns = pkgs.writeShellScriptBin "ns" (builtins.readFile ./path/to/nixpkgs.sh);
+in {
+  environment.systemPackages = [ ns ]
+}
+```
+
 ## Configuration
 
 By default, the configuration file is looked at `$XDG_CONFIG_HOME/nix-search-tv/config.json`
@@ -78,8 +94,10 @@ By default, the configuration file is looked at `$XDG_CONFIG_HOME/nix-search-tv/
 {
   // What indexes to search by default
   //
-  // default: [nixpkgs, "home-manager"]
-  "indexes": ["nixpkgs", "home-manager"],
+  // default:
+  //   linux: [nixpkgs, "home-manager", "nur", "nixos"]
+  //   darwin: [nixpkgs, "home-manager", "nur", "darwin"]
+  "indexes": ["nixpkgs", "home-manager", "nur"],
 
   // How often to look for updates and run
   // indexer again
@@ -96,14 +114,17 @@ By default, the configuration file is looked at `$XDG_CONFIG_HOME/nix-search-tv/
   // the indexing
   //
   // default: true
-  "enable_waiting_message": true
+  "enable_waiting_message": true,
 }
 ```
 
-## Searchable package registries (so far)
+## Searchable package registries
 
-- [Nixpkgs](https://search.nixos.org/packages?channel=unstable) (without NixOS options)
+- [Nixpkgs](https://search.nixos.org/packages?channel=unstable)
 - [Home Manager](https://github.com/nix-community/home-manager)
+- [NixOS](https://search.nixos.org/options)
+- [Darwin](https://github.com/LnL7/nix-darwin)
+- [NUR](https://github.com/nix-community/NUR)
 
 ## Credits
 
