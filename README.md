@@ -1,8 +1,21 @@
 # nix-search-tv
 
+<div>
+    <a href="https://codeberg.org/3timeslazy/nix-search-tv">
+        <img alt="Get it on Codeberg" src="https://img.shields.io/badge/Codeberg-2184D0?style=for-the-badge&logo=Codeberg&logoColor=white" height="60">
+    </a>
+    <a href="https://github.com/3timeslazy/nix-search-tv">
+        <img alt="Get it on GitHub" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" height="60">
+    </a>
+</div>
+
+---
+
 Fuzzy search for NixOS packages.
 
 [![asciicast](https://asciinema.org/a/afNYMXrhoEwwh3wzOK7FbsFtW.svg)](https://asciinema.org/a/afNYMXrhoEwwh3wzOK7FbsFtW)
+
+
 
 ## Installation
 
