@@ -35,7 +35,7 @@ func Preview(out io.Writer, pkg Package) {
 	homepages := ""
 	if hmpgs := len(pkg.Meta.Homepages); hmpgs > 0 {
 		homepages = textutil.Prop(
-			textutil.IfElse(hmpgs > 1, "homepage", "homepages"), "",
+			textutil.IfElse(hmpgs == 1, "homepage", "homepages"), "",
 			strings.Join(pkg.Meta.Homepages, "\n"),
 		)
 		fmt.Fprintln(out, homepages)
