@@ -1,5 +1,11 @@
 # nix-search-tv
 
+Fuzzy search for NixOS packages.
+
+---
+
+[![asciicast](https://asciinema.org/a/afNYMXrhoEwwh3wzOK7FbsFtW.svg)](https://asciinema.org/a/afNYMXrhoEwwh3wzOK7FbsFtW)
+
 <div>
     <a href="https://codeberg.org/3timeslazy/nix-search-tv">
         <img alt="Get it on Codeberg" src="https://img.shields.io/badge/Codeberg-2184D0?style=for-the-badge&logo=Codeberg&logoColor=white" height="60">
@@ -8,14 +14,6 @@
         <img alt="Get it on GitHub" src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" height="60">
     </a>
 </div>
-
----
-
-Fuzzy search for NixOS packages.
-
-[![asciicast](https://asciinema.org/a/afNYMXrhoEwwh3wzOK7FbsFtW.svg)](https://asciinema.org/a/afNYMXrhoEwwh3wzOK7FbsFtW)
-
-
 
 ## Installation
 
@@ -89,7 +87,13 @@ The most straightforward integration might look like:
 alias ns="nix-search-tv print | fzf --preview 'nix-search-tv preview {}'"
 ```
 
-More advanced integration that lets you filter by a package registry and open the homepage and source code can be found in [nixpkgs.sh](./nixpkgs.sh). It can be istalled as:
+More advanced integration might be found here in [nixpkgs.sh](./nixpkgs.sh). It is the same search but with the following shortcuts:
+
+- Search only Nixpkgs or Home Manager
+- Open package code declaration or homepage
+- Search GitHub for snippets with the selected package/option
+
+You can install it like:
 
 ```sh
 let
