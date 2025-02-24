@@ -8,6 +8,7 @@ declare -a INDEXES=(
     "all ctrl-a"
 )
 
+SEARCH_SNIPPET_KEY="ctrl-w"
 OPEN_SOURCE_KEY="ctrl-s"
 OPEN_HOMEPAGE_KEY="enter"
 
@@ -57,6 +58,7 @@ save_state() {
 
 HEADER="$OPEN_HOMEPAGE_KEY  - open homepage
 $OPEN_SOURCE_KEY - open source code
+$SEARCH_SNIPPET_KEY - search github for package snippets
 "
 
 FZF_BINDS=""
@@ -79,6 +81,7 @@ eval "$CMD print | fzf \
     --preview '$CMD preview \$(cat $STATE_FILE) {}' \
     --bind '$OPEN_SOURCE_KEY:execute($CMD source \$(cat $STATE_FILE) {} | xargs $OPENER)' \
     --bind '$OPEN_HOMEPAGE_KEY:execute($CMD homepage \$(cat $STATE_FILE) {} | xargs $OPENER)' \
+    --bind $'$SEARCH_SNIPPET_KEY:execute(echo \"https://github.com/search?type=code&q=lang%3Anix+{2}\" | tr -d \"\'\" | xargs $OPENER)' \
     --layout reverse \
     --scheme history \
     --preview-window=wrap \
