@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"io"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/3timeslazy/nix-search-tv/config"
@@ -66,19 +66,18 @@ func PrintIndexKeys(index string, conf config.Config) error {
 	}
 	defer keys.Close()
 
-	if len(conf.Indexes) == 1 {
-		_, err := io.Copy(Stdout, keys)
-		if err != nil {
-			return fmt.Errorf("print to stdout: %w", err)
-		}
-		return nil
-	}
-
+	allkeys := []string{}
 	scanner := bufio.NewScanner(keys)
 	for scanner.Scan() {
-		out := addIndexPrefix(index, scanner.Text()+"\n")
-		Stdout.Write([]byte(out))
+		if len(conf.Indexes) == 1 {
+			allkeys = append(allkeys, scanner.Text())
+		} else {
+			allkeys = append(allkeys, addIndexPrefix(index, scanner.Text()))
+		}
 	}
+
+	slices.Sort(allkeys)
+	Stdout.Write([]byte(strings.Join(allkeys, "\n")))
 
 	return nil
 }

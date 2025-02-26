@@ -84,8 +84,11 @@ preview_command = "nix-search-tv preview {}"
 The most straightforward integration might look like:
 
 ```sh
-alias ns="nix-search-tv print | fzf --preview 'nix-search-tv preview {}'"
+alias ns="nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history"
 ```
+
+> [!NOTE]
+> No matter how you use nix-search-tv with fzf, it's better to add `--scheme history`. That way, the options will be sorted, which makes the search experience better
 
 More advanced integration might be found here in [nixpkgs.sh](./nixpkgs.sh). It is the same search but with the following shortcuts:
 
