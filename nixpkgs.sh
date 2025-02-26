@@ -5,6 +5,10 @@
 declare -a INDEXES=(
     "nixpkgs ctrl-n"
     "home-manager ctrl-h"
+
+    # you can add any indexes combination here,
+    # like `nixpkgs,nixos`
+
     "all ctrl-a"
 )
 
@@ -77,11 +81,18 @@ done
 # reset the state
 echo "" > /tmp/nix-search-tv-fzf
 
+SEARCH_SNIPPET_CMD=$'echo "{}"'
+# fzf surrounds the matched package with ', trim them
+SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | tr -d \"\'\" "
+# if it's multi-index search, then we need to remote the prefix
+SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | awk \'{ if (\$2) { print \$2 } else print \$1 }\' "
+SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | xargs printf \"https://github.com/search?type=code&q=lang\%3Anix+%s\" \$1 "
+
 eval "$CMD print | fzf \
     --preview '$CMD preview \$(cat $STATE_FILE) {}' \
     --bind '$OPEN_SOURCE_KEY:execute($CMD source \$(cat $STATE_FILE) {} | xargs $OPENER)' \
     --bind '$OPEN_HOMEPAGE_KEY:execute($CMD homepage \$(cat $STATE_FILE) {} | xargs $OPENER)' \
-    --bind $'$SEARCH_SNIPPET_KEY:execute(echo \"https://github.com/search?type=code&q=lang%3Anix+{2}\" | tr -d \"\'\" | xargs $OPENER)' \
+    --bind $'$SEARCH_SNIPPET_KEY:execute($SEARCH_SNIPPET_CMD | xargs $OPENER)' \
     --layout reverse \
     --scheme history \
     --preview-window=wrap \
