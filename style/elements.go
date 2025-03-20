@@ -13,9 +13,20 @@ import (
 )
 
 var (
+	// ` - \x60
+
 	reFencedCodeBlock = regexp.MustCompile(`(?ms)\x60\x60\x60+\s*(.*?)\s*\x60\x60\x60+`)
 	reInlineHyperlink = regexp.MustCompile(`(?m)\[(.*?)\]\n*\((http.*?)\)`)
 	reInlineCode      = regexp.MustCompile(`(?m)\x60\x60?(.*?)\x60\x60?`)
+
+	// reInlineCodeType matches things like
+	//
+	// {command}`ls .`
+	//
+	// to later turne them into
+	//
+	// `ls .`
+	reInlineCodeType = regexp.MustCompile(`(?m)({\w+})\x60`)
 )
 
 var termWidth = sync.OnceValue(func() int {
@@ -53,7 +64,24 @@ func StyleLongDescription(styler TextStyler, text string) string {
 				sb.WriteString(text[start:is[0]])
 				start = is[1]
 				for _, codeLine := range strings.Split(text[is[2]:is[3]], "\n") {
-					sb.WriteString("\t")
+					// This check removes the language info from markdown-like
+					// expressions like
+					//
+					// ```go
+					//   fmt.Println("something")
+					// ```
+					//
+					// turning the text above into
+					//
+					//   fmt.Println("something")
+					//
+					// This is a dumb way to do it, but
+					// works for now
+					if strings.Contains(text, "```"+codeLine) {
+						sb.WriteString("\n")
+						continue
+					}
+					sb.WriteString("  ")
 					sb.WriteString(codeLine)
 					sb.WriteString("\n")
 				}
@@ -63,8 +91,10 @@ func StyleLongDescription(styler TextStyler, text string) string {
 			return sb.String()
 		},
 		func(text string) string { return reInlineHyperlink.ReplaceAllString(text, linkReplace) },
+		func(text string) string { return reInlineCodeType.ReplaceAllString(text, "`") },
 		func(text string) string { return reInlineCode.ReplaceAllString(text, codeReplace) },
 		func(text string) string { return Wrap(text, "") }, // this line differs from the original
+		func(text string) string { return strings.TrimSpace(text) },
 		styler.Dim,
 	} {
 		text = f(text)

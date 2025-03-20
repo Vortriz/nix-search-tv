@@ -25,9 +25,10 @@ func Preview(out io.Writer, pkg Package) {
 	}
 	fmt.Fprintln(out, desc)
 
-	longDesc := ""
+
 	if pkg.Meta.LongDescription != "" && pkg.Meta.Description != pkg.Meta.LongDescription {
-		longDesc = style.StyleLongDescription(styler, pkg.Meta.LongDescription)
+		longDesc := style.StyleLongDescription(styler, pkg.Meta.LongDescription)
+		longDesc += "\n"
 		fmt.Fprintln(out, longDesc)
 	}
 

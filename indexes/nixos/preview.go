@@ -3,7 +3,6 @@ package nixos
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/indexes/textutil"
 	"github.com/3timeslazy/nix-search-tv/style"
@@ -15,9 +14,9 @@ func Preview(out io.Writer, pkg Package) {
 	pkgTitle := textutil.PkgName(pkg.Name) + "\n"
 	fmt.Fprint(out, pkgTitle)
 
-	desc := strings.TrimSpace(pkg.Description)
-	desc = styler.Dim(desc)
-	fmt.Fprintln(out, desc+"\n")
+	desc := style.StyleLongDescription(styler, pkg.Description)
+	desc += "\n"
+	fmt.Fprintln(out, desc)
 
 	typ := textutil.Prop("type", "", pkg.Type)
 	fmt.Fprintln(out, typ)
