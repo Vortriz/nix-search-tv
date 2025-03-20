@@ -25,6 +25,9 @@ func Preview(out io.Writer, pkg Package) {
 	}
 	fmt.Fprintln(out, desc)
 
+	// A small hack, mostly for gnomeExtensions.* packages. These packages' long descriptions
+	// usually start with the main description. It looks fine at search.nixos.org, but not here
+	pkg.Meta.LongDescription = strings.TrimPrefix(pkg.Meta.LongDescription, pkg.Meta.Description)
 
 	if pkg.Meta.LongDescription != "" && pkg.Meta.Description != pkg.Meta.LongDescription {
 		longDesc := style.StyleLongDescription(styler, pkg.Meta.LongDescription)
