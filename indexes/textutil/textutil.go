@@ -11,15 +11,27 @@ import (
 var s = style.StyledText
 
 func PkgName(pkg string) string {
-	styler := style.StyledText
-
-	last := strings.LastIndex(pkg, ".")
-	if last == -1 {
-		return styler.Red(styler.Bold(pkg))
+	if pkg == "" {
+		return ""
 	}
 
-	left := styler.Red(pkg[:last])
-	right := styler.Red(styler.Bold(pkg[last:]))
+	idx := -1
+
+	quoted := pkg[len(pkg)-1] == '"'
+	if quoted {
+		for idx = len(pkg) - 2; idx > 0 && pkg[idx] != '"'; idx-- {
+		}
+	} else {
+		idx = strings.LastIndex(pkg, ".") + 1
+	}
+
+	styler := style.StyledText
+	left := pkg[:idx]
+	if left != "" {
+		left = styler.Red(pkg[:idx])
+	}
+	right := styler.Red(styler.Bold(pkg[idx:]))
+
 	return left + right
 }
 
