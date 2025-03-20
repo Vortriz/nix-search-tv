@@ -115,7 +115,7 @@ func StyleLongDescription(styler TextStyler, text string) string {
 //	rightBorder := " │"
 func PrintCodeBlock(content string) string {
 	for _, env := range os.Environ() {
-		if strings.HasPrefix(env, "FZF_") {
+		if strings.HasPrefix(env, "FZF_PREVIEW") {
 			return PrintCodeBlockV2(content)
 		}
 	}
