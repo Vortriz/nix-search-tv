@@ -16,7 +16,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-const htmlURL = "https://daiderd.com/nix-darwin/manual/index.html"
+const htmlURL = "https://nix-darwin.github.io/nix-darwin/manual/index.html"
 
 type Fetcher struct{}
 

@@ -22,8 +22,9 @@ func (pkg *Package) GetSource() string {
 	}
 
 	return fmt.Sprintf(
-		"https://daiderd.com/nix-darwin/manual/index.html#opt-%s",
+		"%s#opt-%s",
 
+		htmlURL,
 		// There are packages with quotes in their names, like
 		// system.defaults.".GlobalPreferences"."com.apple.mouse.scaling". For these,
 		// the quotes must replaces with "_"
