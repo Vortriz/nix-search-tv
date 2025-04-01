@@ -21,6 +21,15 @@ func Preview(out io.Writer, pkg Package) {
 	typ := textutil.Prop("type", "", pkg.Type)
 	fmt.Fprintln(out, typ)
 
+	def := pkg.Default.Text
+	if def != "" {
+		def = textutil.Prop(
+			"default", "",
+			style.PrintCodeBlock(def),
+		)
+		fmt.Fprintln(out, def)
+	}
+
 	example := ""
 	if pkg.Example.Text != "" {
 		example = textutil.Prop(
