@@ -53,7 +53,6 @@ func IfElse(cond bool, ok, notok string) string {
 var printablePlatforms = []string{
 	"x86_64-linux",
 	"aarch64-linux",
-	"i686-linux",
 	"x86_64-darwin",
 	"aarch64-darwin",
 }
