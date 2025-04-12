@@ -16,7 +16,6 @@ import (
 var (
 	// ` - \x60
 
-	reFencedCodeBlock = regexp.MustCompile(`(?ms)\x60\x60\x60+\s*(.*?)\s*\x60\x60\x60+`)
 	reInlineHyperlink = regexp.MustCompile(`(?m)\[(.*?)\]\n*\((http.*?)\)`)
 	reInlineCode      = regexp.MustCompile(`(?m)\x60\x60?(.*?)\x60\x60?`)
 
@@ -65,41 +64,7 @@ func StyleLongDescription(styler TextStyler, text string) string {
 	codeReplace := styler.Bold("$1") + styler.with(dontEndStyle).Dim("")
 
 	for _, f := range []func(string) string{
-		func(text string) string {
-			var sb strings.Builder
-			sb.Grow(len(text))
-
-			var start int
-			for _, is := range reFencedCodeBlock.FindAllStringSubmatchIndex(text, -1) {
-				sb.WriteString(text[start:is[0]])
-				start = is[1]
-				for _, codeLine := range strings.Split(text[is[2]:is[3]], "\n") {
-					// This check removes the language info from markdown-like
-					// expressions like
-					//
-					// ```go
-					//   fmt.Println("something")
-					// ```
-					//
-					// turning the text above into
-					//
-					//   fmt.Println("something")
-					//
-					// This is a dumb way to do it, but
-					// works for now
-					if strings.Contains(text, "```"+codeLine) {
-						sb.WriteString("\n")
-						continue
-					}
-					sb.WriteString("  ")
-					sb.WriteString(codeLine)
-					sb.WriteString("\n")
-				}
-			}
-			sb.WriteString(text[start:])
-
-			return sb.String()
-		},
+		styleFencedCodeBlock,
 		styleCallouts,
 		func(text string) string { return reInlineHyperlink.ReplaceAllString(text, linkReplace) },
 		func(text string) string { return reInlineCodeType.ReplaceAllString(text, "`") },
@@ -112,6 +77,44 @@ func StyleLongDescription(styler TextStyler, text string) string {
 	}
 
 	return text
+}
+
+var reFencedCodeBlock = regexp.MustCompile(`(?ms)\x60\x60\x60+\s*(.*?)\s*\x60\x60\x60+`)
+
+func styleFencedCodeBlock(text string) string {
+	var sb strings.Builder
+	sb.Grow(len(text))
+
+	var start int
+	for _, is := range reFencedCodeBlock.FindAllStringSubmatchIndex(text, -1) {
+		sb.WriteString(text[start:is[0]])
+		start = is[1]
+		for _, codeLine := range strings.Split(text[is[2]:is[3]], "\n") {
+			// This check removes the language info from markdown-like
+			// expressions like
+			//
+			// ```go
+			//   fmt.Println("something")
+			// ```
+			//
+			// turning the text above into
+			//
+			//   fmt.Println("something")
+			//
+			// This is a dumb way to do it, but
+			// works for now
+			if strings.Contains(text, "```"+codeLine) {
+				sb.WriteString("\n")
+				continue
+			}
+			sb.WriteString("  ")
+			sb.WriteString(codeLine)
+			sb.WriteString("\n")
+		}
+	}
+	sb.WriteString(text[start:])
+
+	return sb.String()
 }
 
 var (
