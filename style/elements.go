@@ -100,6 +100,7 @@ func StyleLongDescription(styler TextStyler, text string) string {
 
 			return sb.String()
 		},
+		styleCallouts,
 		func(text string) string { return reInlineHyperlink.ReplaceAllString(text, linkReplace) },
 		func(text string) string { return reInlineCodeType.ReplaceAllString(text, "`") },
 		func(text string) string { return reInlineCode.ReplaceAllString(text, codeReplace) },
@@ -111,6 +112,32 @@ func StyleLongDescription(styler TextStyler, text string) string {
 	}
 
 	return text
+}
+
+var (
+	reCallouts    = regexp.MustCompile(`(?msU):::\s*{\.\w+}\s*(.*)\s*:{2,3}?`)
+	reCalloutType = regexp.MustCompile(`{\.(\w+)}`)
+)
+
+func styleCallouts(text string) string {
+	return reCallouts.ReplaceAllStringFunc(text, func(str string) string {
+		lines := strings.Split(str, "\n")
+		typ := reCalloutType.FindStringSubmatch(lines[0])[1]
+
+		prefix := StyledText.Bold("| ")
+		switch typ {
+		case "warning", "important", "caution":
+			prefix = StyledText.Red("> ")
+		}
+
+		lines[0], lines[len(lines)-1] = "", ""
+
+		for i := range lines {
+			lines[i] = prefix + lines[i]
+		}
+
+		return strings.Join(lines, "\n")
+	})
 }
 
 // PrintCodeBlock prints the given content inside a styled code block
