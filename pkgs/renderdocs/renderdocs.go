@@ -128,10 +128,10 @@ var knownProps = map[string]bool{
 //
 //	 <p> PROP_VALUE </p>
 //			<span><em> PROP_NAME </em></span>
-//		<table>
+//	 <table>
 //			<tr><td><...> DECLARATION </td></tr>
 //			...
-//		</table>
+//	 </table>
 //
 // =======
 func extractProperties(pkgContent *html.Node) Package {
