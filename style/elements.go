@@ -6,10 +6,10 @@ import (
 	"go/doc/comment"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
-	"sync"
 
-	html2md "github.com/JohannesKaufmann/html-to-markdown/v2"
+	"github.com/3timeslazy/nix-search-tv/pkgs/renderdocs"
 	"golang.org/x/term"
 )
 
@@ -29,22 +29,38 @@ var (
 	reInlineCodeType = regexp.MustCompile(`(?m)({\w+})\x60`)
 )
 
-var termWidth = sync.OnceValue(func() int {
-	termWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
-	return termWidth
-})
+func maxTextWidth() int {
+	if c := os.Getenv("FZF_PREVIEW_COLUMNS"); c != "" {
+		textWidth, _ := strconv.Atoi(c)
+		return textWidth
+	}
 
-func Wrap(text, indent string) string {
-	width := min(termWidth(), 80)
-	if width < 1 {
-		return indent + text
+	// Because this code runs within the preview command, which is
+	// called by a fuzzy finder, it's likely this call will return
+	// an error, so the output will be 0.
+	//
+	// Keeping this check for rare cases when I need to test the
+	// preview in the terminal
+	termWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		return termWidth
+	}
+
+	// Let's hope this width will work for
+	// most of the people
+	return 80
+}
+
+func Wrap(text string) string {
+	width := maxTextWidth()
+
+	if width < 0 {
+		return text
 	}
 
 	d := new(doc.Package).Parser().Parse(text)
 	pr := &comment.Printer{
-		TextCodePrefix: indent + indent,
-		TextPrefix:     indent,
-		TextWidth:      width,
+		TextWidth: width,
 	}
 
 	return string(pr.Text(d))
@@ -65,7 +81,7 @@ func StyleLongDescription(styler TextStyler, text string) string {
 		func(text string) string { return reInlineHyperlink.ReplaceAllString(text, linkReplace) },
 		func(text string) string { return reInlineCodeType.ReplaceAllString(text, "`") },
 		func(text string) string { return reInlineCode.ReplaceAllString(text, codeReplace) },
-		func(text string) string { return Wrap(text, "") }, // this line differs from the original
+		func(text string) string { return Wrap(text) },
 		func(text string) string { return strings.TrimSpace(text) },
 		styler.Dim,
 	} {

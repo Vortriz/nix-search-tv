@@ -1,6 +1,7 @@
 package style
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -12,6 +13,11 @@ var s = StyledText
 const dimStart = "\x1b[2m"
 
 func TestStyleLongDescription(t *testing.T) {
+	// A hack to disable wrapping. Because tests might be running in different environments,
+	// the terminal width may vary between runs. Disable wrapping to make
+	// the tests more stable
+	assert.NoError(t, os.Setenv("FZF_PREVIEW_COLUMNS", "-1"))
+
 	cases := []struct {
 		Desc     string
 		Input    string
@@ -35,17 +41,17 @@ func TestStyleLongDescription(t *testing.T) {
 			Expected: []string{
 				"To open firewall ports for other devices to connect to it. Use either:",
 				"",
-				"	programs.kdeconnect = {",
-				"	  enable = true;",
-				"	  package = pkgs.valent;",
-				"	}",
+				"  programs.kdeconnect = {",
+				"    enable = true;",
+				"    package = pkgs.valent;",
+				"  }",
 				"",
 				"or open corresponding firewall ports directly:",
 				"",
-				"	networking.firewall = rec {",
-				"	  allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];",
-				"	  allowedUDPPortRanges = allowedTCPPortRanges;",
-				"	}",
+				"  networking.firewall = rec {",
+				"    allowedTCPPortRanges = [ { from = 1714; to = 1764; } ];",
+				"    allowedUDPPortRanges = allowedTCPPortRanges;",
+				"  }",
 			},
 		},
 		{
@@ -53,26 +59,25 @@ func TestStyleLongDescription(t *testing.T) {
 			Input: "To install the package on NixOS, you need to add the following options:\n```\nprograms.firefox.nativeMessagingHosts.packages = [ pkgs.firefoxpwa ];\nenvironment.systemPackages = [ pkgs.firefoxpwa ];\n```",
 			Expected: []string{
 				"To install the package on NixOS, you need to add the following options:",
-				"",
-				"	programs.firefox.nativeMessagingHosts.packages = [ pkgs.firefoxpwa ];",
-				"	environment.systemPackages = [ pkgs.firefoxpwa ];",
+				"  programs.firefox.nativeMessagingHosts.packages = [ pkgs.firefoxpwa ];",
+				"  environment.systemPackages = [ pkgs.firefoxpwa ];",
 			},
 		},
 		{
 			Desc:  "hyperlink [nixpkgs.grmon]",
 			Input: "To use it, instrument your Go code following the [usage description](https://github.com/bcicen/grmon?tab=readme-ov-file#usage).\n",
 			Expected: []string{
-				"To use it, instrument your Go code following the " + s.Bold("usage description") + dimStart,
-				"(https://github.com/bcicen/grmon?tab=readme-ov-file#usage).",
+				"To use it, instrument your Go code following the " + s.Bold("usage description") + dimStart +
+					" (https://github.com/bcicen/grmon?tab=readme-ov-file#usage).",
 			},
 		},
 		{
 			Desc:  "inline block inside callout [nixos.virtualisation.vmware.host.enable]",
 			Input: "::: {.note}\ndisable `TRANSPARENT_HUGEPAGE`\n:::",
 			Expected: []string{
-				s.Bold("| ") + " " +
-					s.Bold("| ") + "disable " + s.Bold("TRANSPARENT_HUGEPAGE") + dimStart + " " +
-					s.Bold("| "),
+				s.Bold("| "),
+				s.Bold("| ") + "disable " + s.Bold("TRANSPARENT_HUGEPAGE") + dimStart,
+				s.Bold("| "),
 			},
 		},
 	}

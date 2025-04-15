@@ -22,7 +22,7 @@ func Preview(out io.Writer, pkg Package) {
 
 	desc := ""
 	if pkg.Meta.Description != "" {
-		desc = style.Wrap(pkg.Meta.Description, "") + "\n"
+		desc = style.Wrap(pkg.Meta.Description) + "\n"
 		fmt.Fprintln(out, desc)
 	}
 
