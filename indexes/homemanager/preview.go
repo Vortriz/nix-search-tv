@@ -9,12 +9,10 @@ import (
 )
 
 func Preview(out io.Writer, pkg Package) {
-	styler := style.StyledText
-
 	pkgTitle := textutil.PkgName(pkg.Name) + "\n"
 	fmt.Fprint(out, pkgTitle)
 
-	desc := style.StyleLongDescription(styler, pkg.Description)
+	desc := style.StyleHTML(pkg.Description)
 	desc += "\n"
 	fmt.Fprintln(out, desc)
 

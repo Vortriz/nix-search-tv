@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	html2md "github.com/JohannesKaufmann/html-to-markdown/v2"
 	"golang.org/x/term"
 )
 
@@ -48,6 +49,15 @@ func Wrap(text, indent string) string {
 	}
 
 	return string(pr.Text(d))
+}
+
+func StyleHTML(text string) string {
+	md, err := html2md.ConvertString(text)
+	if err != nil {
+		panic(err)
+	}
+
+	return StyleLongDescription(StyledText, md)
 }
 
 func StyleLongDescription(styler TextStyler, text string) string {
