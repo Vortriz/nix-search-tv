@@ -3,6 +3,7 @@ module github.com/3timeslazy/nix-search-tv
 go 1.23.4
 
 require (
+	github.com/JohannesKaufmann/dom v0.2.0
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.3.1
 	github.com/andybalholm/brotli v1.1.1
 	github.com/aws/aws-sdk-go-v2 v1.36.1
@@ -14,7 +15,6 @@ require (
 )
 
 require (
-	github.com/JohannesKaufmann/dom v0.2.0 // indirect
 	github.com/alecthomas/repr v0.4.0 // indirect
 	github.com/antchfx/xpath v1.3.3 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect

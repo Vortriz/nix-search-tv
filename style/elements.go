@@ -51,11 +51,7 @@ func Wrap(text, indent string) string {
 }
 
 func StyleHTML(text string) string {
-	md, err := html2md.ConvertString(text)
-	if err != nil {
-		panic(err)
-	}
-
+	md := renderdocs.RenderHTML(text)
 	return StyleLongDescription(StyledText, md)
 }
 
