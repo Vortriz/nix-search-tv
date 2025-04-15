@@ -20,7 +20,7 @@ func Index(ctx context.Context, conf config.Config, indexNames []string) error {
 	for _, indexName := range indexNames {
 		fetcher, ok := Fetchers[indexName]
 		if !ok {
-			return ErrUnknownIndex
+			return fmt.Errorf("%w: %s", ErrUnknownIndex, indexName)
 		}
 		indexes = append(indexes, indexer.Index{
 			Name:    indexName,

@@ -86,6 +86,9 @@ func setNixpkgs(pkgs ...string) {
 		// TODO: move into a `setHomeManager` once
 		// it's needed
 		indices.HomeManager: &PkgsFetcher{},
+		indices.Nur:         &PkgsFetcher{},
+		indices.NixOS:       &PkgsFetcher{},
+		indices.Darwin:      &PkgsFetcher{},
 	}
 }
 

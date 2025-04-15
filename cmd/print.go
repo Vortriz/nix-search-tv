@@ -53,7 +53,7 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	}
 	err = Index(ctx, conf, needIndexing)
 	if err != nil {
-		return err
+		return fmt.Errorf("index packages: %w", err)
 	}
 
 	return nil
