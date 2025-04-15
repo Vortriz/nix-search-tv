@@ -10,13 +10,11 @@ import (
 )
 
 func Preview(out io.Writer, pkg Package) {
-	styler := style.StyledText
-
 	pkgTitle := textutil.PkgName(pkg.Name) + "\n"
 	fmt.Fprint(out, pkgTitle)
 
 	desc := strings.TrimSpace(pkg.Description)
-	desc = styler.Dim(desc)
+	desc = style.StyleHTML(desc)
 	fmt.Fprintln(out, desc+"\n")
 
 	typ := textutil.Prop("type", "", pkg.Type)
