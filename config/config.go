@@ -17,17 +17,23 @@ import (
 // Config represents configuration options stored in the
 // config file
 type Config struct {
-	UpdateInterval       Duration `json:"update_interval"`
-	CacheDir             string   `json:"cache_dir"`
-	EnableWaitingMessage bool     `json:"enable_waiting_message"`
-	Indexes              []string `json:"indexes"`
+	UpdateInterval       Duration     `json:"update_interval"`
+	CacheDir             string       `json:"cache_dir"`
+	EnableWaitingMessage bool         `json:"enable_waiting_message"`
+	Indexes              []string     `json:"indexes"`
+	Experimental         Experimental `json:"experimental"`
 }
 
 type config struct {
-	UpdateInterval       *Duration `json:"update_interval"`
-	CacheDir             *string   `json:"cache_dir"`
-	EnableWaitingMessage *bool     `json:"enable_waiting_message"`
-	Indexes              *[]string `json:"indexes"`
+	UpdateInterval       *Duration    `json:"update_interval"`
+	CacheDir             *string      `json:"cache_dir"`
+	EnableWaitingMessage *bool        `json:"enable_waiting_message"`
+	Indexes              *[]string    `json:"indexes"`
+	Experimental         Experimental `json:"experimental"`
+}
+
+type Experimental struct {
+	RenderDocsIndexes map[string]string `json:"render_docs_indexes"`
 }
 
 // Keep the constants below in sync with the `Config` json tags
@@ -88,6 +94,10 @@ func mergeDefaults(loaded config) Config {
 	}
 	if loaded.EnableWaitingMessage != nil {
 		conf.EnableWaitingMessage = *loaded.EnableWaitingMessage
+	}
+
+	conf.Experimental = Experimental{
+		RenderDocsIndexes: loaded.Experimental.RenderDocsIndexes,
 	}
 
 	return conf

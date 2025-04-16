@@ -18,6 +18,7 @@ import (
 	"github.com/3timeslazy/nix-search-tv/indexes/nixos"
 	"github.com/3timeslazy/nix-search-tv/indexes/nixpkgs"
 	"github.com/3timeslazy/nix-search-tv/indexes/nur"
+	"github.com/3timeslazy/nix-search-tv/indexes/renderdocs"
 )
 
 const (
@@ -82,7 +83,11 @@ func Preview(out io.Writer, index string, pkg json.RawMessage) error {
 		darwin.Preview(out, dpkg)
 
 	default:
-		return errors.New("unknown index")
+		dpkg := renderdocs.Package{}
+		if err := json.Unmarshal(pkg, &dpkg); err != nil {
+			return fmt.Errorf("unmarshal package: %w", err)
+		}
+		renderdocs.Preview(out, dpkg)
 	}
 
 	return nil
