@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.75.4
 	github.com/dgraph-io/badger/v4 v4.5.1
 	github.com/jubnzv/go-tmux v0.0.0-20240808014214-bf465a395e96
+	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/urfave/cli/v3 v3.0.0-beta1
 	golang.org/x/term v0.29.0
 )

@@ -2,14 +2,14 @@ package style
 
 import (
 	"fmt"
-	"go/doc"
-	"go/doc/comment"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/pkgs/renderdocs"
+
+	"github.com/mitchellh/go-wordwrap"
 	"golang.org/x/term"
 )
 
@@ -42,7 +42,7 @@ func maxTextWidth() int {
 	// Keeping this check for rare cases when I need to test the
 	// preview in the terminal
 	termWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
+	if err == nil {
 		return termWidth
 	}
 
@@ -58,12 +58,12 @@ func Wrap(text string) string {
 		return text
 	}
 
-	d := new(doc.Package).Parser().Parse(text)
-	pr := &comment.Printer{
-		TextWidth: width,
+	lines := strings.Split(text, "\n")
+	for i, line := range lines {
+		lines[i] = wordwrap.WrapString(line, uint(width))
 	}
 
-	return string(pr.Text(d))
+	return strings.Join(lines, "\n")
 }
 
 func StyleHTML(text string) string {
