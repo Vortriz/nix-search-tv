@@ -1,17 +1,17 @@
-╭──────────────────────────────────────╮╭───────── rPackages.OOBCurve ─────────╮
+╭─────────────── Stdin ────────────────╮╭──────── docbook_sgml_dtd_31 ─────────╮
 │>                             1 / 10  ││                                      │
-╰──────────────────────────────────────╯│ rPackages.OOBCurve (0.3)             │
+╰──────────────────────────────────────╯│ docbook_sgml_dtd_31 (3.1)            │
 ╭────────────── Results ───────────────╮│                                      │
-│> rPackages.OOBCurve                  ││                                      │
-│  pantheon.elementary-iconbrowser     ││ homepage                             │
-│  rPackages.BasicSTARRseq             ││ https://cran.r-project.org/web/pack  │
-│  rPackages.minfiData                 ││                                      │
-│  sbclPackages.cl-glfw-opengl-apple__ ││ license (free)                       │
-│  python313Packages.cppe              ││ No License                           │
-│  docbook_sgml_dtd_31                 ││                                      │
-│  haskellPackages.PropaFP             ││                                      │
+│> docbook_sgml_dtd_31                 ││ license (free)                       │
+│  haskellPackages.PropaFP             ││ No License                           │
 │  haskellPackages.wsdl                ││                                      │
-│  ocamlPackages.github                ││                                      │
+│  ocamlPackages.github                ││ platforms                            │
+│  pantheon.elementary-iconbrowser     ││ x86_64-linux                         │
+│  python313Packages.cppe              ││ aarch64-linux                        │
+│  rPackages.BasicSTARRseq             ││ x86_64-darwin                        │
+│  rPackages.OOBCurve                  ││ aarch64-darwin                       │
+│  rPackages.minfiData                 ││                                      │
+│  sbclPackages.cl-glfw-opengl-apple__ ││                                      │
 │                                      ││                                      │
 │                                      ││                                      │
 │                                      ││                                      │

@@ -1,24 +1,24 @@
                                         ╭──────────────────────────────────────╮
-                                        │ rPackages.OOBCurve (0.3)             │
-  home-manager/ home.pointerCursor.hy·· │                                      │
-  home-manager/ xdg.desktopEntries.<n·· │                                      │
-  home-manager/ services.signaturepdf·· │ homepage                             │
-  home-manager/ programs.ssh.matchBlo·· │ https://cran.r-project.org/web/packa │
+                                        │ docbook_sgml_dtd_31 (3.1)            │
+                                        │                                      │
+  home-manager/ xdg.desktopEntries.<n·· │ license (free)                       │
+  home-manager/ services.signaturepdf·· │ No License                           │
   home-manager/ programs.tmux.shortcut  │                                      │
-  home-manager/ programs.kakoune.conf·· │ license (free)                       │
-  home-manager/ programs.firefox.prof·· │ No License                           │
-  home-manager/ programs.ssh.matchBlo·· │                                      │
-  home-manager/ programs.pandoc.templ·· │                                      │
-  home-manager/ programs.git.difftast·· │                                      │
+  home-manager/ programs.ssh.matchBlo·· │ platforms                            │
+  home-manager/ programs.ssh.matchBlo·· │ x86_64-linux                         │
+  home-manager/ programs.pandoc.templ·· │ aarch64-linux                        │
+  home-manager/ programs.kakoune.conf·· │ x86_64-darwin                        │
+  home-manager/ programs.git.difftast·· │ aarch64-darwin                       │
+  home-manager/ programs.firefox.prof·· │                                      │
+  nixpkgs/ sbclPackages.cl-glfw-openg·· │                                      │
+  nixpkgs/ rPackages.minfiData          │                                      │
+  nixpkgs/ rPackages.OOBCurve           │                                      │
+  nixpkgs/ rPackages.BasicSTARRseq      │                                      │
+  nixpkgs/ python313Packages.cppe       │                                      │
+  nixpkgs/ pantheon.elementary-iconbr·· │                                      │
   nixpkgs/ ocamlPackages.github         │                                      │
   nixpkgs/ haskellPackages.wsdl         │                                      │
   nixpkgs/ haskellPackages.PropaFP      │                                      │
-  nixpkgs/ docbook_sgml_dtd_31          │                                      │
-  nixpkgs/ python313Packages.cppe       │                                      │
-  nixpkgs/ sbclPackages.cl-glfw-openg·· │                                      │
-  nixpkgs/ rPackages.minfiData          │                                      │
-  nixpkgs/ rPackages.BasicSTARRseq      │                                      │
-  nixpkgs/ pantheon.elementary-iconbr·· │                                      │
-▌ nixpkgs/ rPackages.OOBCurve           │                                      │
-  20/20 ─────────────────────────────── │                                      │
+▌ nixpkgs/ docbook_sgml_dtd_31          │                                      │
+  19/19 ─────────────────────────────── │                                      │
 >                                       ╰──────────────────────────────────────╯

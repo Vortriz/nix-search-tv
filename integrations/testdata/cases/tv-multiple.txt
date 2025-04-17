@@ -1,24 +1,24 @@
-╭──────────────────────────────────────╮╭──── nixpkgs/ rPackages.OOBCurve ─────╮
-│>                             1 / 20  ││                                      │
-╰──────────────────────────────────────╯│ rPackages.OOBCurve (0.3)             │
+╭─────────────── Stdin ────────────────╮╭──── nixpkgs/ docbook_sgml_dtd_31 ────╮
+│>                             1 / 19  ││                                      │
+╰──────────────────────────────────────╯│ docbook_sgml_dtd_31 (3.1)            │
 ╭────────────── Results ───────────────╮│                                      │
-│> nixpkgs/ rPackages.OOBCurve         ││                                      │
-│  nixpkgs/ pantheon.elementary-iconbr ││ homepage                             │
-│  nixpkgs/ rPackages.BasicSTARRseq    ││ https://cran.r-project.org/web/pack  │
-│  nixpkgs/ rPackages.minfiData        ││                                      │
-│  nixpkgs/ sbclPackages.cl-glfw-openg ││ license (free)                       │
-│  nixpkgs/ python313Packages.cppe     ││ No License                           │
-│  nixpkgs/ docbook_sgml_dtd_31        ││                                      │
-│  nixpkgs/ haskellPackages.PropaFP    ││                                      │
+│> nixpkgs/ docbook_sgml_dtd_31        ││ license (free)                       │
+│  nixpkgs/ haskellPackages.PropaFP    ││ No License                           │
 │  nixpkgs/ haskellPackages.wsdl       ││                                      │
-│  nixpkgs/ ocamlPackages.github       ││                                      │
+│  nixpkgs/ ocamlPackages.github       ││ platforms                            │
+│  nixpkgs/ pantheon.elementary-iconbr ││ x86_64-linux                         │
+│  nixpkgs/ python313Packages.cppe     ││ aarch64-linux                        │
+│  nixpkgs/ rPackages.BasicSTARRseq    ││ x86_64-darwin                        │
+│  nixpkgs/ rPackages.OOBCurve         ││ aarch64-darwin                       │
+│  nixpkgs/ rPackages.minfiData        ││                                      │
+│  nixpkgs/ sbclPackages.cl-glfw-openg ││                                      │
+│  home-manager/ programs.firefox.prof ││                                      │
 │  home-manager/ programs.git.difftast ││                                      │
+│  home-manager/ programs.kakoune.conf ││                                      │
 │  home-manager/ programs.pandoc.templ ││                                      │
 │  home-manager/ programs.ssh.matchBlo ││                                      │
-│  home-manager/ programs.firefox.prof ││                                      │
-│  home-manager/ programs.kakoune.conf ││                                      │
-│  home-manager/ programs.tmux.shortcu ││                                      │
 │  home-manager/ programs.ssh.matchBlo ││                                      │
+│  home-manager/ programs.tmux.shortcu ││                                      │
 │  home-manager/ services.signaturepdf ││                                      │
 │  home-manager/ xdg.desktopEntries.<n ││                                      │
 ╰─ help: <Ctrl-g>  preview: <Ctrl-o> ──╯╰──────────────────────────────────────╯

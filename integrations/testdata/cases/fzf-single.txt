@@ -1,24 +1,24 @@
                                         ╭──────────────────────────────────────╮
-                                        │ rPackages.OOBCurve (0.3)             │
-                                        │                                      │
-                                        │                                      │
-                                        │ homepage                             │
-                                        │ https://cran.r-project.org/web/packa │
+                                        │ docbook_sgml_dtd_31 (3.1)            │
                                         │                                      │
                                         │ license (free)                       │
                                         │ No License                           │
                                         │                                      │
+                                        │ platforms                            │
+                                        │ x86_64-linux                         │
+                                        │ aarch64-linux                        │
+                                        │ x86_64-darwin                        │
+                                        │ aarch64-darwin                       │
                                         │                                      │
-                                        │                                      │
+  sbclPackages.cl-glfw-opengl-apple__·· │                                      │
+  rPackages.minfiData                   │                                      │
+  rPackages.OOBCurve                    │                                      │
+  rPackages.BasicSTARRseq               │                                      │
+  python313Packages.cppe                │                                      │
+  pantheon.elementary-iconbrowser       │                                      │
   ocamlPackages.github                  │                                      │
   haskellPackages.wsdl                  │                                      │
   haskellPackages.PropaFP               │                                      │
-  docbook_sgml_dtd_31                   │                                      │
-  python313Packages.cppe                │                                      │
-  sbclPackages.cl-glfw-opengl-apple__·· │                                      │
-  rPackages.minfiData                   │                                      │
-  rPackages.BasicSTARRseq               │                                      │
-  pantheon.elementary-iconbrowser       │                                      │
-▌ rPackages.OOBCurve                    │                                      │
+▌ docbook_sgml_dtd_31                   │                                      │
   10/10 ─────────────────────────────── │                                      │
 >                                       ╰──────────────────────────────────────╯
