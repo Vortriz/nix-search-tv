@@ -8,7 +8,7 @@ import (
 	"github.com/3timeslazy/nix-search-tv/style"
 )
 
-func Preview(out io.Writer, pkg Package) {
+func (pkg *Package) Preview(out io.Writer) {
 	pkgTitle := textutil.PkgName(pkg.Name) + "\n"
 	fmt.Fprint(out, pkgTitle)
 

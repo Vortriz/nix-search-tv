@@ -10,8 +10,6 @@ import (
 
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
-	"github.com/3timeslazy/nix-search-tv/indexes/indices"
-	"github.com/3timeslazy/nix-search-tv/indexes/renderdocs"
 
 	"github.com/urfave/cli/v3"
 )
@@ -31,14 +29,11 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	}
 	indexes := conf.Indexes
 
-	for index, indexHTML := range conf.Experimental.RenderDocsIndexes {
-		if slices.Contains(indexes, index) {
-			return fmt.Errorf("index %q declared twice", index)
-		}
-
-		indexes = append(indexes, index)
-		indices.Fetchers[index] = renderdocs.NewFetcher(indexHTML)
+	registered, err := RegisterRenderDocs(conf)
+	if err != nil {
+		return fmt.Errorf("register render-docs: %w", err)
 	}
+	indexes = append(indexes, registered...)
 
 	needIndexing, err := indexer.NeedIndexing(
 		conf.CacheDir,

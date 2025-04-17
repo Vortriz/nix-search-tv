@@ -11,6 +11,7 @@ import (
 
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexes/indices"
+	"github.com/3timeslazy/nix-search-tv/indexes/renderdocs"
 
 	"github.com/urfave/cli/v3"
 )
@@ -78,13 +79,32 @@ func GetConfig(cmd *cli.Command) (config.Config, error) {
 	return conf, nil
 }
 
-func validateIndexes(indexes []string) error {
-	for _, ind := range indexes {
-		if !indices.Indexes[ind] {
-			avail := slices.Collect(maps.Keys(indices.Indexes))
+func validateIndexes(indexNames []string) error {
+	for _, ind := range indexNames {
+		if !indices.BuiltinIndexes[ind] {
+			avail := slices.Collect(maps.Keys(indices.BuiltinIndexes))
 			str := strings.Join(avail, "\n  ")
 			return fmt.Errorf("unknown index %q. Valid values are:\n  %s", ind, str)
 		}
 	}
 	return nil
+}
+
+func RegisterRenderDocs(conf config.Config) ([]string, error) {
+	for index, indexHTML := range conf.Experimental.RenderDocsIndexes {
+		err := indices.Register(
+			index,
+			renderdocs.NewFetcher(indexHTML),
+			func() indices.Pkg {
+				return &renderdocs.Package{
+					PageURL: indexHTML,
+				}
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("register index %q: %w", index, err)
+		}
+	}
+
+	return slices.Collect(maps.Keys(conf.Experimental.RenderDocsIndexes)), nil
 }

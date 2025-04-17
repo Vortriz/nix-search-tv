@@ -19,6 +19,7 @@ import (
 
 type Package struct {
 	indexer.Package
+	PageURL     string   `json:"-"`
 	Description string   `json:"description"`
 	Type        string   `json:"type"`
 	Default     string   `json:"default"`

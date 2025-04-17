@@ -79,7 +79,7 @@ func getCache(t *testing.T, state state) []string {
 }
 
 func setNixpkgs(pkgs ...string) {
-	Fetchers = map[string]indexer.Fetcher{
+	indices.SetFetchers(map[string]indexer.Fetcher{
 		indices.Nixpkgs: &PkgsFetcher{
 			pkgs: pkgs,
 		},
@@ -89,13 +89,13 @@ func setNixpkgs(pkgs ...string) {
 		indices.Nur:         &PkgsFetcher{},
 		indices.NixOS:       &PkgsFetcher{},
 		indices.Darwin:      &PkgsFetcher{},
-	}
+	})
 }
 
 func setFailingFetcher() {
-	Fetchers = map[string]indexer.Fetcher{
+	indices.SetFetchers(map[string]indexer.Fetcher{
 		indices.Nixpkgs: &FailFetcher{},
-	}
+	})
 }
 
 type FailFetcher struct{}

@@ -8,7 +8,6 @@ package indices
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 
@@ -18,8 +17,13 @@ import (
 	"github.com/3timeslazy/nix-search-tv/indexes/nixos"
 	"github.com/3timeslazy/nix-search-tv/indexes/nixpkgs"
 	"github.com/3timeslazy/nix-search-tv/indexes/nur"
-	"github.com/3timeslazy/nix-search-tv/indexes/renderdocs"
 )
+
+type Pkg interface {
+	Preview(io.Writer)
+	GetSource() string
+	GetHomepage() string
+}
 
 const (
 	Nixpkgs     = "nixpkgs"
@@ -29,7 +33,7 @@ const (
 	Darwin      = "darwin"
 )
 
-var Indexes = map[string]bool{
+var BuiltinIndexes = map[string]bool{
 	Nixpkgs:     true,
 	HomeManager: true,
 	Nur:         true,
@@ -37,7 +41,15 @@ var Indexes = map[string]bool{
 	Darwin:      true,
 }
 
-var Fetchers = map[string]indexer.Fetcher{
+var newPkgs = map[string]func() Pkg{
+	Nixpkgs:     func() Pkg { return &nixpkgs.Package{} },
+	HomeManager: func() Pkg { return &homemanager.Package{} },
+	Nur:         func() Pkg { return &nur.Package{} },
+	NixOS:       func() Pkg { return &nixos.Package{} },
+	Darwin:      func() Pkg { return &darwin.Package{} },
+}
+
+var fetchers = map[string]indexer.Fetcher{
 	Nixpkgs:     &nixpkgs.Fetcher{},
 	HomeManager: &homemanager.Fetcher{},
 	Nur:         &nur.Fetcher{},
@@ -45,116 +57,93 @@ var Fetchers = map[string]indexer.Fetcher{
 	Darwin:      &darwin.Fetcher{},
 }
 
-func Preview(out io.Writer, index string, pkg json.RawMessage) error {
-	switch index {
-	case Nixpkgs:
-		nixpkg := nixpkgs.Package{}
-		if err := json.Unmarshal(pkg, &nixpkg); err != nil {
-			return fmt.Errorf("unmarshal package: %w", err)
-		}
-		nixpkgs.Preview(out, nixpkg)
+func Register(
+	index string,
+	fetcher indexer.Fetcher,
+	newpkg func() Pkg,
+) error {
+	err := registerFetcher(index, fetcher)
+	if err != nil {
+		return fmt.Errorf("builtin %q fetcher already registered", index)
+	}
 
-	case HomeManager:
-		hmpkg := homemanager.Package{}
-		if err := json.Unmarshal(pkg, &hmpkg); err != nil {
-			return fmt.Errorf("unmarshal package: %w", err)
-		}
-		homemanager.Preview(out, hmpkg)
-
-	case Nur:
-		nurpkg := nur.Package{}
-		if err := json.Unmarshal(pkg, &nurpkg); err != nil {
-			return fmt.Errorf("unmarshal package: %w", err)
-		}
-		nur.Preview(out, nurpkg)
-
-	case NixOS:
-		nixospkg := nixos.Package{}
-		if err := json.Unmarshal(pkg, &nixospkg); err != nil {
-			return fmt.Errorf("unmarshal package: %w", err)
-		}
-		nixos.Preview(out, nixospkg)
-
-	case Darwin:
-		dpkg := darwin.Package{}
-		if err := json.Unmarshal(pkg, &dpkg); err != nil {
-			return fmt.Errorf("unmarshal package: %w", err)
-		}
-		darwin.Preview(out, dpkg)
-
-	default:
-		dpkg := renderdocs.Package{}
-		if err := json.Unmarshal(pkg, &dpkg); err != nil {
-			return fmt.Errorf("unmarshal package: %w", err)
-		}
-		renderdocs.Preview(out, dpkg)
+	err = registerNewPkg(index, newpkg)
+	if err != nil {
+		return fmt.Errorf("builtin %q builder already registered", index)
 	}
 
 	return nil
 }
 
-func SourcePreview(out io.Writer, index string, pkg json.RawMessage) error {
-	var src interface {
-		GetSource() string
+func Preview(index string, out io.Writer, pkgContent json.RawMessage) error {
+	pkg, err := getPkg(index, pkgContent)
+	if err != nil {
+		return err
 	}
 
-	switch index {
-	case Nixpkgs:
-		src = &nixpkgs.Package{}
+	pkg.Preview(out)
+	return nil
+}
 
-	case HomeManager:
-		src = &homemanager.Package{}
-
-	case Nur:
-		src = &nur.Package{}
-
-	case NixOS:
-		src = &nixos.Package{}
-
-	case Darwin:
-		src = &darwin.Package{}
-
-	default:
-		return errors.New("unknown index")
+func SourcePreview(index string, out io.Writer, pkgContent json.RawMessage) error {
+	pkg, err := getPkg(index, pkgContent)
+	if err != nil {
+		return err
 	}
 
-	if err := json.Unmarshal(pkg, &src); err != nil {
-		return fmt.Errorf("unmarshal package: %w", err)
-	}
-
-	_, err := out.Write([]byte(src.GetSource()))
+	_, err = out.Write([]byte(pkg.GetSource()))
 	return err
 }
 
-func HomepagePreview(out io.Writer, index string, pkg json.RawMessage) error {
-	var src interface {
-		GetHomepage() string
+func HomepagePreview(index string, out io.Writer, pkgContent json.RawMessage) error {
+	pkg, err := getPkg(index, pkgContent)
+	if err != nil {
+		return err
 	}
 
-	switch index {
-	case Nixpkgs:
-		src = &nixpkgs.Package{}
-
-	case HomeManager:
-		src = &homemanager.Package{}
-
-	case Nur:
-		src = &nur.Package{}
-
-	case NixOS:
-		src = &nixos.Package{}
-
-	case Darwin:
-		src = &darwin.Package{}
-
-	default:
-		return errors.New("unknown index")
-	}
-
-	if err := json.Unmarshal(pkg, &src); err != nil {
-		return fmt.Errorf("unmarshal package: %w", err)
-	}
-
-	_, err := out.Write([]byte(src.GetHomepage()))
+	_, err = out.Write([]byte(pkg.GetHomepage()))
 	return err
+}
+
+func registerNewPkg(index string, newpkg func() Pkg) error {
+	if _, ok := newPkgs[index]; ok {
+		return fmt.Errorf("index %q already registered", index)
+	}
+
+	newPkgs[index] = newpkg
+	return nil
+}
+
+func getPkg(index string, pkgContent json.RawMessage) (Pkg, error) {
+	newPkg, ok := newPkgs[index]
+	if !ok {
+		return nil, fmt.Errorf("unknown index: %q", index)
+	}
+
+	pkg := newPkg()
+	if err := json.Unmarshal(pkgContent, &pkg); err != nil {
+		return nil, fmt.Errorf("unmarshal package: %w", err)
+	}
+
+	return pkg, nil
+}
+
+func registerFetcher(index string, fetcher indexer.Fetcher) error {
+	if _, ok := fetchers[index]; ok {
+		return fmt.Errorf("index %q already registered", index)
+	}
+
+	fetchers[index] = fetcher
+	return nil
+}
+
+func GetFetcher(index string) (indexer.Fetcher, bool) {
+	f, ok := fetchers[index]
+	return f, ok
+}
+
+// SetFetchers overrides internal fetchers var
+// and only used for testing
+func SetFetchers(newFetchers map[string]indexer.Fetcher) {
+	fetchers = newFetchers
 }

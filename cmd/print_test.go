@@ -160,7 +160,7 @@ func TestPrintIndexing(t *testing.T) {
 
 		// set fetchers to nil. If everything is correct, they won't be triggered. If
 		// there's a bug, the test will panic
-		Fetchers = nil
+		indices.SetFetchers(nil)
 		assert.NotPanics(t, func() {
 			runPrint(t, ctx, state.CacheDir)
 		})

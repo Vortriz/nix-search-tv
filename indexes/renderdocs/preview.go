@@ -9,7 +9,7 @@ import (
 	"github.com/3timeslazy/nix-search-tv/style"
 )
 
-func Preview(out io.Writer, pkg Package) {
+func (pkg *Package) Preview(out io.Writer) {
 	pkgTitle := textutil.PkgName(pkg.Name) + "\n"
 	fmt.Fprint(out, pkgTitle)
 
@@ -35,4 +35,24 @@ func Preview(out io.Writer, pkg Package) {
 		)
 		fmt.Fprintln(out, example)
 	}
+}
+
+func (pkg *Package) GetSource() string {
+	if len(pkg.DeclaredBy) == 1 {
+		return pkg.DeclaredBy[0]
+	}
+
+	return fmt.Sprintf(
+		"%s#opt-%s",
+
+		pkg.PageURL,
+		// There are packages with quotes in their names, like
+		// system.defaults.".GlobalPreferences"."com.apple.mouse.scaling". For these,
+		// the quotes must replaces with "_"
+		strings.ReplaceAll(pkg.Name, `"`, "_"),
+	)
+}
+
+func (pkg *Package) GetHomepage() string {
+	return pkg.GetSource()
 }

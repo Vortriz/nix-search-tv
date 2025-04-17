@@ -102,21 +102,3 @@ func (pkg *Package) GetVersion() string {
 	// TODO: comment about nvidia-docker
 	return strings.TrimPrefix(pkg.Meta.Name, pkg.Name+"-")
 }
-
-func (pkg *Package) GetSource() string {
-	src := pkg.Meta.Position
-	if src == "" {
-		return src
-	}
-
-	src, _, _ = strings.Cut(src, ":")
-	return "https://github.com/NixOS/nixpkgs/blob/nixos-unstable/" + src
-}
-
-func (pkg *Package) GetHomepage() string {
-	if len(pkg.Meta.Homepages) > 0 {
-		return pkg.Meta.Homepages[0]
-	}
-
-	return pkg.GetSource()
-}

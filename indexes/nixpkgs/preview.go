@@ -10,7 +10,7 @@ import (
 	"github.com/3timeslazy/nix-search-tv/style"
 )
 
-func Preview(out io.Writer, pkg Package) {
+func (pkg *Package) Preview(out io.Writer) {
 	styler := style.StyledText
 
 	pkgTitle := textutil.PkgName(pkg.Name) + " " + styler.Dim("("+pkg.GetVersion()+")")
@@ -81,4 +81,22 @@ func licensesString(ls []License) string {
 	}
 
 	return strings.Join(ss, "\n")
+}
+
+func (pkg *Package) GetSource() string {
+	src := pkg.Meta.Position
+	if src == "" {
+		return src
+	}
+
+	src, _, _ = strings.Cut(src, ":")
+	return "https://github.com/NixOS/nixpkgs/blob/nixos-unstable/" + src
+}
+
+func (pkg *Package) GetHomepage() string {
+	if len(pkg.Meta.Homepages) > 0 {
+		return pkg.Meta.Homepages[0]
+	}
+
+	return pkg.GetSource()
 }

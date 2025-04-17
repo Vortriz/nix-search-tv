@@ -22,7 +22,7 @@ var Preview = &cli.Command{
 	Flags:     BaseFlags(),
 }
 
-type PreviewFunc func(out io.Writer, index string, pkg json.RawMessage) error
+type PreviewFunc func(index string, out io.Writer, pkg json.RawMessage) error
 
 func NewPreviewAction(preview PreviewFunc) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
@@ -38,6 +38,11 @@ func NewPreviewAction(preview PreviewFunc) cli.ActionFunc {
 		if fullPkgName == waitingMessage {
 			PreviewWaiting(Stdout, conf)
 			return nil
+		}
+
+		_, err = RegisterRenderDocs(conf)
+		if err != nil {
+			return fmt.Errorf("register render-docs: %w", err)
 		}
 
 		var index, pkgName string
@@ -58,6 +63,6 @@ func NewPreviewAction(preview PreviewFunc) cli.ActionFunc {
 			return fmt.Errorf("load package content: %w", err)
 		}
 
-		return preview(Stdout, index, pkg)
+		return preview(index, Stdout, pkg)
 	}
 }
