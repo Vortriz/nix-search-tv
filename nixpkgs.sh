@@ -14,10 +14,17 @@ declare -a INDEXES=(
 
 SEARCH_SNIPPET_KEY="ctrl-w"
 OPEN_SOURCE_KEY="ctrl-s"
-OPEN_HOMEPAGE_KEY="enter"
+OPEN_HOMEPAGE_KEY="ctrl-o"
+NIX_SHELL_KEY="ctrl-i"
 
 OPENER="xdg-open"
+
 if [[ "$(uname)" == 'Darwin' ]]; then
+    SEARCH_SNIPPET_KEY="alt-w"
+    OPEN_SOURCE_KEY="alt-s"
+    OPEN_HOMEPAGE_KEY="alt-o"
+    NIX_SHELL_KEY="alt-i"
+
     OPENER="open"
 fi
 
@@ -60,9 +67,10 @@ save_state() {
     echo "execute(echo $indexes_flag > $STATE_FILE)"
 }
 
-HEADER="$OPEN_HOMEPAGE_KEY  - open homepage
-$OPEN_SOURCE_KEY - open source code
-$SEARCH_SNIPPET_KEY - search github for package snippets
+HEADER="$OPEN_HOMEPAGE_KEY - open homepage
+$OPEN_SOURCE_KEY - open source
+$SEARCH_SNIPPET_KEY - search github for snippets
+$NIX_SHELL_KEY - nix-shell
 "
 
 FZF_BINDS=""
@@ -79,23 +87,30 @@ for e in "${INDEXES[@]}"; do
 done
 
 # reset the state
-echo "" > /tmp/nix-search-tv-fzf
+echo "" >/tmp/nix-search-tv-fzf
 
 SEARCH_SNIPPET_CMD=$'echo "{}"'
 # fzf surrounds the matched package with ', trim them
 SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | tr -d \"\'\" "
 # if it's multi-index search, then we need to remote the prefix
 SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | awk \'{ if (\$2) { print \$2 } else print \$1 }\' "
-SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | xargs printf \"https://github.com/search?type=code&q=lang\%3Anix+%s\" \$1 "
+SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | xargs printf \"https://github.com/search?type=code&q=lang:nix+%s\" \$1 "
+
+NIX_SHELL_CMD='nix-shell --run $SHELL -p $(echo "{}" | sed "s:nixpkgs/::g"'
+NIX_SHELL_CMD="$NIX_SHELL_CMD | tr -d \"\'\")"
+
+PREVIEW_WINDOW="wrap"
+[ "$(tput cols)" -lt 90 ] && PREVIEW_WINDOW="$PREVIEW_WINDOW,up"
 
 eval "$CMD print | fzf \
     --preview '$CMD preview \$(cat $STATE_FILE) {}' \
     --bind '$OPEN_SOURCE_KEY:execute($CMD source \$(cat $STATE_FILE) {} | xargs $OPENER)' \
     --bind '$OPEN_HOMEPAGE_KEY:execute($CMD homepage \$(cat $STATE_FILE) {} | xargs $OPENER)' \
     --bind $'$SEARCH_SNIPPET_KEY:execute($SEARCH_SNIPPET_CMD | xargs $OPENER)' \
+    --bind $'$NIX_SHELL_KEY:become($NIX_SHELL_CMD)' \
     --layout reverse \
     --scheme history \
-    --preview-window=wrap \
+    --preview-window='$PREVIEW_WINDOW' \
     --header '$HEADER' \
     --header-first \
     --header-border \
