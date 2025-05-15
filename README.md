@@ -52,17 +52,6 @@ There are many ways how one can install a package from a flake, below is one:
 }
 ```
 
-### Go
-
-```sh
-git clone https://github.com/3timeslazy/nix-search-tv
-cd nix-search-tv
-go install ./cmd/nix-search-tv
-
-# `go install github.com/3timeslazy/nix-search-tv/cmd/nix-search-tv@latest` won't work
-# because go.mod contains a replace directive
-```
-
 ## Usage
 
 `nix-search-tv` does not do the search by itself, but rather integrates
