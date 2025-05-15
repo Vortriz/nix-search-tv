@@ -55,7 +55,6 @@ func (f *Fetcher) GetLatestRelease(ctx context.Context, md indexer.IndexMetadata
 
 func (f *Fetcher) DownloadRelease(ctx context.Context, release string) (io.ReadCloser, error) {
 	release = strings.TrimPrefix(release, prefix)
-	fmt.Println(release)
 	url, _ := url.JoinPath("https://releases.nixos.org/nixos/unstable", release, "options.json.br")
 
 	resp, err := http.Get(url)
@@ -65,7 +64,6 @@ func (f *Fetcher) DownloadRelease(ctx context.Context, release string) (io.ReadC
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("expected http 200, but %d", resp.StatusCode)
 	}
-
 
 	return readutil.PackagesWrapper(readutil.NewBrotli(resp.Body)), nil
 }
