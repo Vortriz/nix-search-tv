@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# In case the system uses a non-POSIX shell, like fish or nushell,
+# we want to ensure run also our forked processes in a bash environment.
+SHELL="bash"
+
 # === Change keybinds or add more here ===
 
 declare -a INDEXES=(
