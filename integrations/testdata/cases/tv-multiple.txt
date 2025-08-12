@@ -1,5 +1,5 @@
 ╭─────────────── Stdin ────────────────╮╭──── nixpkgs/ docbook_sgml_dtd_31 ────╮
-│>                             1 / 19  ││                                      │
+│>                             1 / 20  ││                                      │
 ╰──────────────────────────────────────╯│ docbook_sgml_dtd_31 (3.1)            │
 ╭────────────── Results ───────────────╮│                                      │
 │> nixpkgs/ docbook_sgml_dtd_31        ││ license (free)                       │
@@ -12,6 +12,7 @@
 │  nixpkgs/ rPackages.OOBCurve         ││ aarch64-darwin                       │
 │  nixpkgs/ rPackages.minfiData        ││                                      │
 │  nixpkgs/ sbclPackages.cl-glfw-openg ││                                      │
+│  home-manager/ home.pointerCursor.hy ││                                      │
 │  home-manager/ programs.firefox.prof ││                                      │
 │  home-manager/ programs.git.difftast ││                                      │
 │  home-manager/ programs.kakoune.conf ││                                      │
@@ -20,5 +21,4 @@
 │  home-manager/ programs.ssh.matchBlo ││                                      │
 │  home-manager/ programs.tmux.shortcu ││                                      │
 │  home-manager/ services.signaturepdf ││                                      │
-│  home-manager/ xdg.desktopEntries.<n ││                                      │
 ╰─ help: <Ctrl-g>  preview: <Ctrl-o> ──╯╰──────────────────────────────────────╯

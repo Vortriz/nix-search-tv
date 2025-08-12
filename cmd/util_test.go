@@ -36,7 +36,7 @@ func setup(t *testing.T) state {
 	buf := bytes.NewBuffer(nil)
 	Stdout = buf
 
-	setNixpkgs("nix-search-tv")
+	indices.SetFetchers(map[string]indexer.Fetcher{})
 
 	t.Cleanup(func() {
 		assert.NoError(t, os.RemoveAll(cacheDir))
@@ -51,7 +51,7 @@ func setup(t *testing.T) state {
 
 		Stdout = nil
 
-		setNixpkgs("nix-search-tv")
+		indices.SetFetchers(map[string]indexer.Fetcher{})
 	})
 
 	return state{
@@ -65,13 +65,24 @@ func setMetadata(t *testing.T, state state, md indexer.IndexMetadata) {
 	mdbytes, err := json.Marshal(md)
 	assert.NoError(t, err)
 
-	path := filepath.Join(state.CacheDir, indices.Nixpkgs, "metadata.json")
+	path := filepath.Join(
+		state.CacheDir,
+		"nix-search-tv",
+		indices.Nixpkgs,
+		"metadata.json",
+	)
 	err = os.WriteFile(path, mdbytes, 0666)
 	assert.NoError(t, err)
 }
 
 func getCache(t *testing.T, state state) []string {
-	cacheb, err := os.ReadFile(filepath.Join(state.CacheDir, indices.Nixpkgs, "cache.txt"))
+	path := filepath.Join(
+		state.CacheDir,
+		"nix-search-tv",
+		indices.Nixpkgs,
+		"cache.txt",
+	)
+	cacheb, err := os.ReadFile(path)
 	assert.NoError(t, err)
 
 	cache := strings.TrimSpace(string(cacheb))
@@ -83,18 +94,6 @@ func setNixpkgs(pkgs ...string) {
 		indices.Nixpkgs: &PkgsFetcher{
 			pkgs: pkgs,
 		},
-		// TODO: move into a `setHomeManager` once
-		// it's needed
-		indices.HomeManager: &PkgsFetcher{},
-		indices.Nur:         &PkgsFetcher{},
-		indices.NixOS:       &PkgsFetcher{},
-		indices.Darwin:      &PkgsFetcher{},
-	})
-}
-
-func setFailingFetcher() {
-	indices.SetFetchers(map[string]indexer.Fetcher{
-		indices.Nixpkgs: &FailFetcher{},
 	})
 }
 

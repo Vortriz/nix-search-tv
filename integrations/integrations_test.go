@@ -144,7 +144,7 @@ func testIntegration(t *testing.T, cmdArgs CmdArgs, expected string) {
 	// but we have to wait for the fuzzy tool
 	// to print something and I don't know a better
 	// way yet
-	time.Sleep(2 * time.Second)
+	time.Sleep(4 * time.Second)
 
 	output, err := pane.Capture()
 	assert.NoError(t, err)

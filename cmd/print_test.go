@@ -3,31 +3,32 @@ package cmd
 import (
 	"cmp"
 	"context"
-	"fmt"
+	"encoding/json"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
 
+	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
 	"github.com/3timeslazy/nix-search-tv/indexes/indices"
+
 	"github.com/alecthomas/assert/v2"
 	"github.com/urfave/cli/v3"
 )
 
 func TestPrintInvalidFlags(t *testing.T) {
-	ctx := context.Background()
-
 	runPrint := func(args ...string) error {
 		cmd := cli.Command{
 			Writer: io.Discard,
 			Flags:  BaseFlags(),
 			Action: PrintAction,
 		}
-		return cmd.Run(ctx, append([]string{"print"}, args...))
+		return cmd.Run(context.TODO(), append([]string{"print"}, args...))
 	}
 
 	t.Run("given config not exist", func(t *testing.T) {
@@ -48,69 +49,106 @@ func TestPrintInvalidFlags(t *testing.T) {
 }
 
 func TestPrintConfig(t *testing.T) {
-	ctx := context.Background()
+	t.Run("read the file provided by --config", func(t *testing.T) {
+		state := setup(t)
 
-	runPrint := func(t *testing.T, ctx context.Context) {
-		cmd := cli.Command{
-			Writer: io.Discard,
-			Flags:  BaseFlags(),
-			Action: PrintAction,
-		}
-		err := cmd.Run(ctx, []string{"print"})
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: true,
+			"indexes":                      []string{indices.HomeManager},
+		})
+
+		tmp, err := os.CreateTemp("", "config-file")
 		assert.NoError(t, err)
-	}
+		defer tmp.Close()
+		_, err = tmp.WriteString(`{"enable_waiting_message": false, "indexes": ["nixpkgs"]}`)
+		assert.NoError(t, err)
+
+		setNixpkgs("nix-search-tv")
+
+		printCmd(t, "--config", tmp.Name())
+
+		expected := []string{
+			"nix-search-tv",
+			"",
+		}
+		output := state.Stdout.String()
+
+		assert.Equal(t, expected, strings.Split(output, "\n"))
+	})
 
 	t.Run("read default file if no config given", func(t *testing.T) {
 		state := setup(t)
 
-		confdir := filepath.Join(state.ConfigDir, "nix-search-tv")
-		assert.NoError(t, os.MkdirAll(confdir, 0755))
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{indices.Nixpkgs},
+		})
 
-		// enable_waiting_message is true by default, so
-		// if we don't see it in the output - the config file was used
-		conffile := filepath.Join(confdir, "config.json")
-		assert.NoError(t, os.WriteFile(conffile, []byte(`{ "enable_waiting_message": false }`), 0666))
+		setNixpkgs("nix-search-tv")
 
-		runPrint(t, ctx)
+		printCmd(t)
 
-		data := state.Stdout.String()
-		assert.NotContains(t, data, waitingMessage)
-		assert.Contains(t, data, "nix-search-tv")
+		expected := []string{
+			"nix-search-tv",
+			"",
+		}
+		output := state.Stdout.String()
+
+		assert.Equal(t, expected, strings.Split(output, "\n"))
 	})
 
 	t.Run("use defaults when default file not exist", func(t *testing.T) {
 		state := setup(t)
 
-		runPrint(t, ctx)
+		fetchers := map[string]indexer.Fetcher{
+			indices.Nixpkgs:     &PkgsFetcher{[]string{"nixpkg"}},
+			indices.HomeManager: &PkgsFetcher{[]string{"home-manager"}},
+			indices.Nur:         &PkgsFetcher{[]string{"nur"}},
+		}
+
+		osPkg := ""
+		osIndex := ""
+		switch runtime.GOOS {
+		case "darwin":
+			osPkg = "darwin"
+			osIndex = indices.Darwin
+
+		case "linux":
+			osPkg = "nixos"
+			osIndex = indices.NixOS
+		}
+		fetchers[osIndex] = &PkgsFetcher{[]string{osPkg}}
+		indices.SetFetchers(fetchers)
+
+		printCmd(t)
 
 		// enable_waiting_message is true by default, so
 		// if we see it in the output - the defaults were used
-		data := state.Stdout.String()
-		assert.Contains(t, data, waitingMessage)
-		assert.Contains(t, data, "nix-search-tv")
+		output := state.Stdout.String()
+		expected := []string{
+			"",
+			waitingMessage,
+			"nixpkgs/ nixpkg",
+			"home-manager/ home-manager",
+			"nur/ nur",
+			osIndex + "/ " + osPkg,
+		}
+
+		assertSortEqual(t, expected, strings.Split(output, "\n"))
 	})
 }
 
 func TestPrintIndexing(t *testing.T) {
-	ctx := context.Background()
-
-	runPrint := func(t *testing.T, ctx context.Context, cacheDir string) {
-		cmd := cli.Command{
-			Writer: io.Discard,
-			Flags:  BaseFlags(),
-			Action: PrintAction,
-		}
-		err := cmd.Run(ctx, append([]string{"print"}, []string{
-			"--indexes", indices.Nixpkgs,
-			"--cache-dir", cacheDir,
-		}...))
-		assert.NoError(t, err)
+	runPrint := func(t *testing.T) {
+		printCmd(t, "--indexes", indices.Nixpkgs)
 	}
 
-	t.Run("run -> no index -> indexing", func(t *testing.T) {
+	t.Run("no cache -> indexing", func(t *testing.T) {
 		state := setup(t)
 
-		runPrint(t, ctx, state.CacheDir)
+		setNixpkgs("nix-search-tv")
+
+		runPrint(t)
 
 		expectedPaths := map[string]bool{
 			"nixpkgs":               false,
@@ -136,53 +174,150 @@ func TestPrintIndexing(t *testing.T) {
 		assertSortEqual(t, []string{"nix-search-tv"}, cache)
 	})
 
-	t.Run("has index -> need indexing -> indexing", func(t *testing.T) {
+	t.Run("has cache -> need indexing -> indexing", func(t *testing.T) {
 		state := setup(t)
 
-		// generate the first index
-		runPrint(t, ctx, state.CacheDir)
+		setNixpkgs("nix-search-tv")
+
+		// generate the cache
+		runPrint(t)
 
 		// reset metadata and run again
 		newpkgs := []string{"televison", "fzf"}
 		setNixpkgs(newpkgs...)
 		setMetadata(t, state, indexer.IndexMetadata{})
-		runPrint(t, ctx, state.CacheDir)
+
+		runPrint(t)
 
 		cache := getCache(t, state)
 		assertSortEqual(t, newpkgs, cache)
 	})
 
-	t.Run("has index -> indexing not needed", func(t *testing.T) {
-		state := setup(t)
+	t.Run("has cache -> indexing not needed", func(t *testing.T) {
+		setup(t)
 
-		// generate the first index
-		runPrint(t, ctx, state.CacheDir)
+		setNixpkgs("nix-search-tv")
 
-		// set fetchers to nil. If everything is correct, they won't be triggered. If
-		// there's a bug, the test will panic
-		indices.SetFetchers(nil)
-		assert.NotPanics(t, func() {
-			runPrint(t, ctx, state.CacheDir)
+		// generate the cache
+		runPrint(t)
+
+		// set failing fetcher. If everything is correct, it won't be triggered. If
+		// there's a bug, the test fail
+		indices.SetFetchers(map[string]indexer.Fetcher{
+			indices.Nixpkgs: &FailFetcher{},
 		})
+
+		runPrint(t)
 	})
 
-	t.Run("single index failed", func(t *testing.T) {
+	t.Run("an index failed", func(t *testing.T) {
 		state := setup(t)
 
-		setFailingFetcher()
-		runPrint(t, ctx, state.CacheDir)
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: true,
+			"indexes":                      []string{indices.Nixpkgs, indices.HomeManager},
+		})
 
-		expected := fmt.Sprintf("%s/ indexing failed", indices.Nixpkgs)
-		assert.Contains(t, state.Stdout.String(), expected)
+		indices.SetFetchers(map[string]indexer.Fetcher{
+			indices.Nixpkgs:     &FailFetcher{},
+			indices.HomeManager: &PkgsFetcher{[]string{"programs.zsh"}},
+		})
+
+		printCmd(t, "--indexes", indices.Nixpkgs+","+indices.HomeManager)
+
+		expected := []string{
+			waitingMessage,
+			"nixpkgs/ indexing failed: get latest release: failed to get latest release",
+			"home-manager/ programs.zsh",
+			"",
+		}
+		output := state.Stdout.String()
+
+		assert.Equal(t, expected, strings.Split(output, "\n"))
 	})
 
 	t.Run("need update, but not new version", func(t *testing.T) {
 
 	})
+}
 
-	t.Run("run multiple indexes at once", func(t *testing.T) {
+func TestPrint(t *testing.T) {
+	t.Run("multiple builtin indexes", func(t *testing.T) {
+		state := setup(t)
 
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{indices.Nixpkgs, indices.HomeManager},
+		})
+
+		indices.SetFetchers(map[string]indexer.Fetcher{
+			indices.Nixpkgs: &PkgsFetcher{
+				pkgs: []string{"lazygit"},
+			},
+			indices.HomeManager: &PkgsFetcher{
+				pkgs: []string{"programs.lazygit.enable"},
+			},
+		})
+
+		printCmd(t)
+
+		expected := []string{
+			"",
+			"home-manager/ programs.lazygit.enable",
+			"nixpkgs/ lazygit",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+
+		assertSortEqual(t, expected, output)
 	})
+
+	t.Run("packages printed in lexicographical order", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{indices.Nixpkgs},
+		})
+
+		setNixpkgs(
+			"pkg-a",
+			"pkg-z",
+			"pkg-k",
+		)
+
+		printCmd(t)
+
+		expected := []string{
+			"",
+			"pkg-a",
+			"pkg-k",
+			"pkg-z",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assertSortEqual(t, expected, output)
+	})
+}
+
+func printCmd(t *testing.T, args ...string) {
+	cmd := cli.Command{
+		Writer: io.Discard,
+		Flags:  BaseFlags(),
+		Action: PrintAction,
+	}
+	err := cmd.Run(context.TODO(), append([]string{"print"}, args...))
+	assert.NoError(t, err)
+}
+
+func writeXdgConfig(t *testing.T, state state, conf map[string]any) {
+	confDir := filepath.Join(state.ConfigDir, "nix-search-tv")
+	assert.NoError(t, os.MkdirAll(confDir, 0755))
+
+	confPath := filepath.Join(confDir, "config.json")
+
+	confBytes, err := json.Marshal(conf)
+	assert.NoError(t, err)
+
+	assert.NoError(t, os.WriteFile(confPath, confBytes, 0666))
 }
 
 func assertSortEqual[S ~[]E, E cmp.Ordered](t *testing.T, expected, actual S) {
