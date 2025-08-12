@@ -59,13 +59,24 @@ with other general purpose fuzzy finders, such as [television](https://github.co
 
 ### Television
 
-Add `nix_channels.toml` file to your television config directory with the content below:
+Add `nix.toml` file to your television cables directory with the content below:
 
 ```toml
-[[cable_channel]]
-name = "nixpkgs"
-source_command = "nix-search-tv print"
-preview_command = "nix-search-tv preview {}"
+[metadata]
+name = "nix"
+requirements = ["nix-search-tv"]
+
+[source]
+command = "nix-search-tv print"
+
+[preview]
+command = "nix-search-tv preview {}"
+```
+
+or use the Home Manager option:
+
+```nix
+programs.nix-search-tv.enableTelevisionIntegration = true;
 ```
 
 ### fzf

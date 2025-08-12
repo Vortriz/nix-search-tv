@@ -1,24 +1,24 @@
-╭─────────────── Stdin ────────────────╮╭──────── docbook_sgml_dtd_31 ─────────╮
-│>                             1 / 10  ││                                      │
-╰──────────────────────────────────────╯│ docbook_sgml_dtd_31 (3.1)            │
-╭────────────── Results ───────────────╮│                                      │
-│> docbook_sgml_dtd_31                 ││ license (free)                       │
-│  haskellPackages.PropaFP             ││ No License                           │
-│  haskellPackages.wsdl                ││                                      │
-│  ocamlPackages.github                ││ platforms                            │
-│  pantheon.elementary-iconbrowser     ││ x86_64-linux                         │
-│  python313Packages.cppe              ││ aarch64-linux                        │
-│  rPackages.BasicSTARRseq             ││ x86_64-darwin                        │
-│  rPackages.OOBCurve                  ││ aarch64-darwin                       │
-│  rPackages.minfiData                 ││                                      │
-│  sbclPackages.cl-glfw-opengl-apple__ ││                                      │
-│                                      ││                                      │
-│                                      ││                                      │
-│                                      ││                                      │
-│                                      ││                                      │
-│                                      ││                                      │
-│                                      ││                                      │
-│                                      ││                                      │
-│                                      ││                                      │
-│                                      ││                                      │
-╰─ help: <Ctrl-g>  preview: <Ctrl-o> ──╯╰──────────────────────────────────────╯
+╭─────────────── stdin ────────────────╮╭──────── docbook_sgml_dtd_31 ─────────╮
+│>                             1 / 10  ││ docbook_sgml_dtd_31 (3.1)            ▲
+╰──────────────────────────────────────╯│                                      █
+╭────────────── Results ───────────────╮│ license (free)                       █
+│> docbook_sgml_dtd_31                 ││ No License                           █
+│  haskellPackages.PropaFP             ││                                      █
+│  haskellPackages.wsdl                ││ platforms                            █
+│  ocamlPackages.github                ││ x86_64-linux                         █
+│  pantheon.elementary-iconbrowser     ││ aarch64-linux                        █
+│  python313Packages.cppe              ││ x86_64-darwin                        █
+│  rPackages.BasicSTARRseq             ││ aarch64-darwin                       █
+│  rPackages.OOBCurve                  ││                                      █
+│  rPackages.minfiData                 ││                                      █
+│  sbclPackages.cl-glfw-opengl-apple_… ││                                      █
+│                                      ││                                      █
+│                                      ││                                      ║
+│                                      ││                                      ║
+│                                      ││                                      ║
+│                                      ││                                      ║
+│                                      ││                                      ║
+│                                      ││                                      ║
+│                                      ││                                      ▼
+╰──────────────────────────────────────╯╰──────────────────────────────────────╯
+  CHANNEL  stdin[Hint] Remote Control: Ctrl-t • Hide Preview: Ct        v0.13.2

@@ -62,6 +62,7 @@ func TestIntegrations(t *testing.T) {
 					ToolPreview: fzfPreview(searchFlags),
 					SearchBin:   binPath,
 					SearchFlags: searchFlags,
+					PreviewFlag: "--preview",
 				},
 				expected(t, name),
 			)
@@ -75,6 +76,7 @@ func TestIntegrations(t *testing.T) {
 					ToolPreview: tvPreview(searchFlags),
 					SearchBin:   binPath,
 					SearchFlags: searchFlags,
+					PreviewFlag: "--preview-command",
 				},
 				expected(t, name),
 			)
@@ -93,6 +95,7 @@ func TestIntegrations(t *testing.T) {
 					ToolPreview: fzfPreview(searchFlags),
 					SearchBin:   binPath,
 					SearchFlags: searchFlags,
+					PreviewFlag: "--preview",
 				},
 				expected(t, name),
 			)
@@ -106,6 +109,7 @@ func TestIntegrations(t *testing.T) {
 					ToolPreview: tvPreview(searchFlags),
 					SearchBin:   binPath,
 					SearchFlags: searchFlags,
+					PreviewFlag: "--preview-command",
 				},
 				expected(t, name),
 			)
@@ -121,10 +125,11 @@ type CmdArgs struct {
 	ToolPreview string
 	SearchBin   string
 	SearchFlags string
+	PreviewFlag string
 }
 
 var cmdTmpl = template.Must(template.New("").Parse(
-	"{{ .SearchBin }} print {{ .SearchFlags }} | {{ .Tool }} --preview '{{ .ToolPreview }}'",
+	"{{ .SearchBin }} print {{ .SearchFlags }} | {{ .Tool }} {{ .PreviewFlag }} '{{ .ToolPreview }}'",
 ))
 
 func testIntegration(t *testing.T, cmdArgs CmdArgs, expected string) {

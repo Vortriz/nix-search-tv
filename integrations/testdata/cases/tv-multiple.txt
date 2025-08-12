@@ -1,24 +1,24 @@
-╭─────────────── Stdin ────────────────╮╭──── nixpkgs/ docbook_sgml_dtd_31 ────╮
-│>                             1 / 20  ││                                      │
-╰──────────────────────────────────────╯│ docbook_sgml_dtd_31 (3.1)            │
-╭────────────── Results ───────────────╮│                                      │
-│> nixpkgs/ docbook_sgml_dtd_31        ││ license (free)                       │
-│  nixpkgs/ haskellPackages.PropaFP    ││ No License                           │
-│  nixpkgs/ haskellPackages.wsdl       ││                                      │
-│  nixpkgs/ ocamlPackages.github       ││ platforms                            │
-│  nixpkgs/ pantheon.elementary-iconbr ││ x86_64-linux                         │
-│  nixpkgs/ python313Packages.cppe     ││ aarch64-linux                        │
-│  nixpkgs/ rPackages.BasicSTARRseq    ││ x86_64-darwin                        │
-│  nixpkgs/ rPackages.OOBCurve         ││ aarch64-darwin                       │
-│  nixpkgs/ rPackages.minfiData        ││                                      │
-│  nixpkgs/ sbclPackages.cl-glfw-openg ││                                      │
-│  home-manager/ home.pointerCursor.hy ││                                      │
-│  home-manager/ programs.firefox.prof ││                                      │
-│  home-manager/ programs.git.difftast ││                                      │
-│  home-manager/ programs.kakoune.conf ││                                      │
-│  home-manager/ programs.pandoc.templ ││                                      │
-│  home-manager/ programs.ssh.matchBlo ││                                      │
-│  home-manager/ programs.ssh.matchBlo ││                                      │
-│  home-manager/ programs.tmux.shortcu ││                                      │
-│  home-manager/ services.signaturepdf ││                                      │
-╰─ help: <Ctrl-g>  preview: <Ctrl-o> ──╯╰──────────────────────────────────────╯
+╭─────────────── stdin ────────────────╮╭──── nixpkgs/ docbook_sgml_dtd_31 ────╮
+│>                             1 / 20  ││ docbook_sgml_dtd_31 (3.1)            ▲
+╰──────────────────────────────────────╯│                                      █
+╭────────────── Results ───────────────╮│ license (free)                       █
+│> nixpkgs/ docbook_sgml_dtd_31        ││ No License                           █
+│  nixpkgs/ haskellPackages.PropaFP    ││                                      █
+│  nixpkgs/ haskellPackages.wsdl       ││ platforms                            █
+│  nixpkgs/ ocamlPackages.github       ││ x86_64-linux                         █
+│  nixpkgs/ pantheon.elementary-iconb… ││ aarch64-linux                        █
+│  nixpkgs/ python313Packages.cppe     ││ x86_64-darwin                        █
+│  nixpkgs/ rPackages.BasicSTARRseq    ││ aarch64-darwin                       █
+│  nixpkgs/ rPackages.OOBCurve         ││                                      █
+│  nixpkgs/ rPackages.minfiData        ││                                      █
+│  nixpkgs/ sbclPackages.cl-glfw-open… ││                                      █
+│  home-manager/ home.pointerCursor.h… ││                                      █
+│  home-manager/ programs.firefox.pro… ││                                      ║
+│  home-manager/ programs.git.difftas… ││                                      ║
+│  home-manager/ programs.kakoune.con… ││                                      ║
+│  home-manager/ programs.pandoc.temp… ││                                      ║
+│  home-manager/ programs.ssh.matchBl… ││                                      ║
+│  home-manager/ programs.ssh.matchBl… ││                                      ║
+│  home-manager/ programs.tmux.shortc… ││                                      ▼
+╰──────────────────────────────────────╯╰──────────────────────────────────────╯
+  CHANNEL  stdin[Hint] Remote Control: Ctrl-t • Hide Preview: Ct        v0.13.2

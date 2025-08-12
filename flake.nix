@@ -27,7 +27,7 @@
 
           (mkScript "test-integrations" "build && NIX_SEARCH_TV_BIN=$DEV_DIR/bin/nix-search-tv go test --count 1 -v ./integrations/...")
 
-          (mkScript "build-n-tv" "build && print-search | tv --preview 'preview-search {}'")
+          (mkScript "build-n-tv" "build && print-search | tv --preview-command 'preview-search {}'")
           (mkScript "build-n-fzf" "build && print-search | fzf --wrap --preview 'preview-search {}' --preview-window=wrap --scheme=history")
         ];
 
