@@ -36,7 +36,7 @@ func setup(t *testing.T) state {
 	buf := bytes.NewBuffer(nil)
 	Stdout = buf
 
-	indices.SetFetchers(map[string]indexer.Fetcher{})
+	indices.Reset()
 
 	t.Cleanup(func() {
 		assert.NoError(t, os.RemoveAll(cacheDir))
@@ -51,7 +51,7 @@ func setup(t *testing.T) state {
 
 		Stdout = nil
 
-		indices.SetFetchers(map[string]indexer.Fetcher{})
+		indices.Reset()
 	})
 
 	return state{

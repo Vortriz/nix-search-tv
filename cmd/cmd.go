@@ -4,14 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"maps"
 	"os"
-	"slices"
 	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexes/indices"
-	"github.com/3timeslazy/nix-search-tv/indexes/renderdocs"
 
 	"github.com/urfave/cli/v3"
 )
@@ -68,7 +65,7 @@ func GetConfig(cmd *cli.Command) (config.Config, error) {
 		conf.CacheDir = cmd.String(CacheDirFlag)
 	}
 
-	if err = validateIndexes(conf.Indexes); err != nil {
+	if err = validateIndexes(conf, conf.Indexes); err != nil {
 		return config.Config{}, err
 	}
 
@@ -79,32 +76,24 @@ func GetConfig(cmd *cli.Command) (config.Config, error) {
 	return conf, nil
 }
 
-func validateIndexes(indexNames []string) error {
-	for _, ind := range indexNames {
-		if !indices.BuiltinIndexes[ind] {
-			avail := slices.Collect(maps.Keys(indices.BuiltinIndexes))
-			str := strings.Join(avail, "\n  ")
-			return fmt.Errorf("unknown index %q. Valid values are:\n  %s", ind, str)
+func validateIndexes(conf config.Config, indexNames []string) error {
+	for index := range conf.Experimental.RenderDocsIndexes {
+		if indices.BuiltinIndexes[index] {
+			return fmt.Errorf("experimental %[1]q conflicts with builtin %[1]q", index)
 		}
 	}
+
+	for _, index := range indexNames {
+		if indices.BuiltinIndexes[index] {
+			continue
+		}
+
+		_, parseHTML := conf.Experimental.RenderDocsIndexes[index]
+		if !parseHTML {
+			valid := strings.Join(indexNames, "\n")
+			return fmt.Errorf("unknown index %q. Valid values are:\n %s", index, valid)
+		}
+	}
+
 	return nil
-}
-
-func RegisterRenderDocs(conf config.Config) ([]string, error) {
-	for index, indexHTML := range conf.Experimental.RenderDocsIndexes {
-		err := indices.Register(
-			index,
-			renderdocs.NewFetcher(indexHTML),
-			func() indices.Pkg {
-				return &renderdocs.Package{
-					PageURL: indexHTML,
-				}
-			},
-		)
-		if err != nil {
-			return nil, fmt.Errorf("register index %q: %w", index, err)
-		}
-	}
-
-	return slices.Collect(maps.Keys(conf.Experimental.RenderDocsIndexes)), nil
 }

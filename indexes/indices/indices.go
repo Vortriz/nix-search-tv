@@ -3,7 +3,7 @@
 // their fetches and previews
 //
 // Also, as a lot of code uses `indexes` word for variable names, this package
-// creates an `indices` alias to avoid conflicts with `indexes`
+// creates an `indices` alias to avoid conflicts with `indexes`.
 package indices
 
 import (
@@ -146,4 +146,9 @@ func GetFetcher(index string) (indexer.Fetcher, bool) {
 // and only used for testing
 func SetFetchers(newFetchers map[string]indexer.Fetcher) {
 	fetchers = newFetchers
+}
+
+func Reset() {
+	fetchers = map[string]indexer.Fetcher{}
+	newPkgs = map[string]func() Pkg{}
 }

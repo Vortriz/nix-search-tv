@@ -112,17 +112,12 @@ func runIndex(
 func NeedIndexing(
 	cacheDir string,
 	updateInterval time.Duration,
-	indexes []string,
-) ([]string, error) {
-	needIndex := []string{}
+	indexes []Index,
+) ([]Index, error) {
+	needIndex := []Index{}
 
 	for _, index := range indexes {
-		indexDir := filepath.Join(cacheDir, index)
-		md, err := getIndexMetadata(indexDir)
-		if err != nil {
-			return nil, fmt.Errorf("get metadata: %w", err)
-		}
-		if time.Since(md.LastIndexedAt) > time.Duration(updateInterval) {
+		if time.Since(index.Metadata.LastIndexedAt) > time.Duration(updateInterval) {
 			needIndex = append(needIndex, index)
 		}
 	}

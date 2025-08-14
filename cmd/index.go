@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -9,41 +8,55 @@ import (
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
 	"github.com/3timeslazy/nix-search-tv/indexes/indices"
+	"github.com/3timeslazy/nix-search-tv/indexes/renderdocs"
 )
 
 var ErrUnknownIndex = errors.New("unknown index")
 
-func Index(ctx context.Context, conf config.Config, indexNames []string) error {
+func RegisterCustomIndexes(conf config.Config) ([]string, error) {
+	indexNames := []string{}
+
+	for index, indexHTML := range conf.Experimental.RenderDocsIndexes {
+		err := indices.Register(
+			index,
+			renderdocs.NewFetcher(indexHTML),
+			func() indices.Pkg {
+				return &renderdocs.Package{
+					PageURL: indexHTML,
+				}
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("register render_docs index %q: %w", index, err)
+		}
+
+		indexNames = append(indexNames, index)
+	}
+
+	return indexNames, nil
+}
+
+func GetIndexes(cacheDir string, indexNames []string) ([]indexer.Index, error) {
 	indexes := []indexer.Index{}
 	for _, indexName := range indexNames {
 		fetcher, ok := indices.GetFetcher(indexName)
 		if !ok {
-			return fmt.Errorf("%w: %s", ErrUnknownIndex, indexName)
+			return nil, fmt.Errorf("%w: %s", ErrUnknownIndex, indexName)
 		}
+
+		md, err := indexer.GetIndexMetadata(cacheDir, indexName)
+		if err != nil {
+			return nil, fmt.Errorf("get metadata for %q: %w", indexName, err)
+		}
+
 		indexes = append(indexes, indexer.Index{
-			Name:    indexName,
-			Fetcher: fetcher,
+			Name:     indexName,
+			Fetcher:  fetcher,
+			Metadata: md,
 		})
 	}
 
-	results := indexer.RunIndexing(ctx, conf.CacheDir, indexes)
-	for result := range results {
-		if result.Err != nil {
-			msg := addIndexPrefix(
-				result.Index,
-				fmt.Sprintf("indexing failed: %s\n", result.Err),
-			)
-			Stdout.Write([]byte(msg))
-			continue
-		}
-
-		err := PrintIndexKeys(result.Index, conf)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return indexes, nil
 }
 
 // The two functions below connect the print and preview

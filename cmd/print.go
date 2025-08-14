@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"maps"
 	"slices"
 	"time"
 
@@ -26,13 +27,29 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("get config: %w", err)
 	}
-	indexes := conf.Indexes
+	indexNames := conf.Indexes
 
-	registered, err := RegisterRenderDocs(conf)
+	customIndexes, err := RegisterCustomIndexes(conf)
 	if err != nil {
-		return fmt.Errorf("register render-docs: %w", err)
+		return fmt.Errorf("register fetchers: %w", err)
 	}
-	indexes = append(indexes, registered...)
+
+	indexNames = append(indexNames, customIndexes...)
+
+	// If a custom index is passed via flag e.g.
+	// `--indexes nvf`, it will appear twice in
+	// `indexNames`, which will lead to problems
+	// later
+	indexesSet := map[string]struct{}{}
+	for _, indexName := range indexNames {
+		indexesSet[indexName] = struct{}{}
+	}
+	indexNames = slices.Collect(maps.Keys(indexesSet))
+
+	indexes, err := GetIndexes(conf.CacheDir, indexNames)
+	if err != nil {
+		return fmt.Errorf("get indexes: %w", err)
+	}
 
 	needIndexing, err := indexer.NeedIndexing(
 		conf.CacheDir,
@@ -49,23 +66,41 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 		}
 	}
 
+	withPrefix := len(indexes) > 1
+
 	for _, index := range indexes {
-		if !slices.Contains(needIndexing, index) {
-			err = PrintIndexKeys(index, conf)
+		canPrint := !slices.ContainsFunc(needIndexing, func(need indexer.Index) bool {
+			return need.Name == index.Name
+		})
+		if canPrint {
+			err = PrintIndexKeys(conf, index.Name, withPrefix)
 			if err != nil {
 				return fmt.Errorf("%s: %w", index, err)
 			}
 		}
 	}
-	err = Index(ctx, conf, needIndexing)
-	if err != nil {
-		return fmt.Errorf("index packages: %w", err)
+
+	results := indexer.RunIndexing(ctx, conf.CacheDir, needIndexing)
+	for result := range results {
+		if result.Err != nil {
+			msg := addIndexPrefix(
+				result.Index,
+				fmt.Sprintf("indexing failed: %s\n", result.Err),
+			)
+			Stdout.Write([]byte(msg))
+			continue
+		}
+
+		err := PrintIndexKeys(conf, result.Index, withPrefix)
+		if err != nil {
+			return fmt.Errorf("%s: %w", result.Index, err)
+		}
 	}
 
 	return nil
 }
 
-func PrintIndexKeys(index string, conf config.Config) error {
+func PrintIndexKeys(conf config.Config, index string, withPrefix bool) error {
 	keys, err := indexer.OpenKeysReader(conf.CacheDir, index)
 	if err != nil {
 		return fmt.Errorf("read keys file: %w", err)
@@ -79,7 +114,7 @@ func PrintIndexKeys(index string, conf config.Config) error {
 	}
 
 	prefix := []byte{}
-	if len(conf.Indexes) > 1 {
+	if withPrefix {
 		prefix = []byte(index + "/ ")
 	}
 

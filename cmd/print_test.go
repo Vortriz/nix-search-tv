@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"io"
 	"io/fs"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -45,6 +47,35 @@ func TestPrintInvalidFlags(t *testing.T) {
 		err := runPrint("--indexes", "nixpkgs,unknown")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "unknown index")
+	})
+}
+
+func TestPrintInvalidConfig(t *testing.T) {
+	runPrint := func(args ...string) error {
+		cmd := cli.Command{
+			Writer: io.Discard,
+			Flags:  BaseFlags(),
+			Action: PrintAction,
+		}
+		return cmd.Run(context.TODO(), append([]string{"print"}, args...))
+	}
+
+	t.Run("builtin indexes are not allowed in custom config", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{indices.Nixpkgs},
+			"experimental": map[string]any{
+				"render_docs_indexes": map[string]string{
+					indices.Nixpkgs: "http://localhost",
+				},
+			},
+		})
+
+		err := runPrint()
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "conflicts")
 	})
 }
 
@@ -298,6 +329,92 @@ func TestPrint(t *testing.T) {
 	})
 }
 
+func TestParseHTML(t *testing.T) {
+	htmlPage := readTestdata(t, "nvf.html")
+	srv := httptest.NewServer(http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
+		wr.Write(htmlPage)
+	}))
+	defer srv.Close()
+
+	t.Run("only render_docs index via config", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{},
+			"experimental": map[string]any{
+				"render_docs_indexes": map[string]any{
+					"nvf": srv.URL,
+				},
+			},
+		})
+
+		printCmd(t)
+
+		expected := []string{
+			"",
+			"_module.args",
+			"vim.enableLuaLoader",
+			"vim.package",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assertSortEqual(t, expected, output)
+	})
+
+	t.Run("only render_docs index via flag", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{},
+			"experimental": map[string]any{
+				"render_docs_indexes": map[string]any{
+					"nvf": srv.URL,
+				},
+			},
+		})
+
+		printCmd(t, "--indexes", "nvf")
+
+		expected := []string{
+			"",
+			"_module.args",
+			"vim.enableLuaLoader",
+			"vim.package",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assertSortEqual(t, expected, output)
+	})
+
+	t.Run("builtin and render_docs index", func(t *testing.T) {
+		state := setup(t)
+
+		setNixpkgs("lazygit")
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{indices.Nixpkgs},
+			"experimental": map[string]any{
+				"render_docs_indexes": map[string]any{
+					"nvf": srv.URL,
+				},
+			},
+		})
+
+		printCmd(t)
+
+		expected := []string{
+			"",
+			"nixpkgs/ lazygit",
+			"nvf/ _module.args",
+			"nvf/ vim.enableLuaLoader",
+			"nvf/ vim.package",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assertSortEqual(t, expected, output)
+	})
+}
+
 func printCmd(t *testing.T, args ...string) {
 	cmd := cli.Command{
 		Writer: io.Discard,
@@ -324,4 +441,16 @@ func assertSortEqual[S ~[]E, E cmp.Ordered](t *testing.T, expected, actual S) {
 	slices.Sort(expected)
 	slices.Sort(actual)
 	assert.Equal(t, expected, actual)
+}
+
+func readTestdata(t *testing.T, filename string) []byte {
+	pwd, err := os.Getwd()
+	assert.NoError(t, err)
+
+	path := filepath.Join(pwd, "testdata", filename)
+
+	data, err := os.ReadFile(path)
+	assert.NoError(t, err)
+
+	return data
 }

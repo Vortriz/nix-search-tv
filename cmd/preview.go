@@ -40,9 +40,9 @@ func NewPreviewAction(preview PreviewFunc) cli.ActionFunc {
 			return nil
 		}
 
-		_, err = RegisterRenderDocs(conf)
+		_, err = RegisterCustomIndexes(conf)
 		if err != nil {
-			return fmt.Errorf("register render-docs: %w", err)
+			return err
 		}
 
 		var index, pkgName string

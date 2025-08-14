@@ -8,14 +8,17 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 const metadataFile = "metadata.json"
 const cacheFile = "cache.txt"
 
-func getIndexMetadata(dir string) (IndexMetadata, error) {
+func GetIndexMetadata(cacheDir, indexName string) (IndexMetadata, error) {
+	indexDir := filepath.Join(cacheDir, indexName)
+
 	md := IndexMetadata{}
-	path, err := initFile(dir, metadataFile, []byte("{}"))
+	path, err := initFile(indexDir, metadataFile, []byte("{}"))
 	if err != nil {
 		return md, fmt.Errorf("init metadata: %w", err)
 	}
