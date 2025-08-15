@@ -3,6 +3,8 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/3timeslazy/nix-search-tv/config"
@@ -13,8 +15,8 @@ import (
 
 var ErrUnknownIndex = errors.New("unknown index")
 
-func RegisterCustomIndexes(conf config.Config) ([]string, error) {
-	indexNames := []string{}
+func SetupIndexes(conf config.Config) ([]string, error) {
+	indexNames := slices.Collect(maps.Keys(indices.BuiltinIndexes))
 
 	for index, indexHTML := range conf.Experimental.RenderDocsIndexes {
 		err := indices.Register(

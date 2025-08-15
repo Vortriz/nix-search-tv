@@ -58,9 +58,6 @@ func GetConfig(cmd *cli.Command) (config.Config, error) {
 		return config.Config{}, fmt.Errorf("load config: %w", err)
 	}
 
-	if cmd.IsSet(IndexesFlag) {
-		conf.Indexes = cmd.StringSlice(IndexesFlag)
-	}
 	if cmd.IsSet(CacheDirFlag) {
 		conf.CacheDir = cmd.String(CacheDirFlag)
 	}

@@ -40,7 +40,11 @@ func NewPreviewAction(preview PreviewFunc) cli.ActionFunc {
 			return nil
 		}
 
-		_, err = RegisterCustomIndexes(conf)
+		if cmd.IsSet(IndexesFlag) {
+			conf.Indexes = cmd.StringSlice(IndexesFlag)
+		}
+
+		_, err = SetupIndexes(conf)
 		if err != nil {
 			return err
 		}

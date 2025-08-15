@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"maps"
 	"slices"
 	"time"
 
@@ -27,26 +26,28 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return fmt.Errorf("get config: %w", err)
 	}
-	indexNames := conf.Indexes
 
-	customIndexes, err := RegisterCustomIndexes(conf)
+	available, err := SetupIndexes(conf)
 	if err != nil {
 		return fmt.Errorf("register fetchers: %w", err)
 	}
 
-	indexNames = append(indexNames, customIndexes...)
+	requested := available
+	if cmd.IsSet(IndexesFlag) {
+		flags := cmd.StringSlice(IndexesFlag)
 
-	// If a custom index is passed via flag e.g.
-	// `--indexes nvf`, it will appear twice in
-	// `indexNames`, which will lead to problems
-	// later
-	indexesSet := map[string]struct{}{}
-	for _, indexName := range indexNames {
-		indexesSet[indexName] = struct{}{}
+		requested = slices.DeleteFunc(requested, func(index string) bool {
+			return !slices.Contains(flags, index)
+		})
+	} else {
+		requested = slices.DeleteFunc(requested, func(index string) bool {
+			builtin := slices.Contains(conf.Indexes, index)
+			_, renderDocs := conf.Experimental.RenderDocsIndexes[index]
+			return !builtin && !renderDocs
+		})
 	}
-	indexNames = slices.Collect(maps.Keys(indexesSet))
 
-	indexes, err := GetIndexes(conf.CacheDir, indexNames)
+	indexes, err := GetIndexes(conf.CacheDir, requested)
 	if err != nil {
 		return fmt.Errorf("get indexes: %w", err)
 	}

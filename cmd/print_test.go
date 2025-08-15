@@ -327,6 +327,71 @@ func TestPrint(t *testing.T) {
 		output := strings.Split(state.Stdout.String(), "\n")
 		assertSortEqual(t, expected, output)
 	})
+
+	t.Run("only nixpkgs via flag", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{indices.Nixpkgs, indices.HomeManager},
+			"experimental": map[string]any{
+				"render_docs_indexes": map[string]any{
+					"nvf": "http://localhost",
+				},
+			},
+		})
+
+		setNixpkgs("lazygit")
+
+		printCmd(t, "--indexes", indices.Nixpkgs)
+
+		expected := []string{
+			"",
+			"lazygit",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assertSortEqual(t, expected, output)
+	})
+
+	t.Run("index duplicate via flag", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{indices.Nixpkgs},
+		})
+
+		setNixpkgs("lazygit")
+
+		printCmd(t, "--indexes", "nixpkgs,nixpkgs")
+
+		expected := []string{
+			"",
+			"lazygit",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assertSortEqual(t, expected, output)
+	})
+
+	t.Run("index duplicate in config", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{indices.Nixpkgs, indices.Nixpkgs},
+		})
+
+		setNixpkgs("lazygit")
+
+		printCmd(t)
+
+		expected := []string{
+			"",
+			"lazygit",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assertSortEqual(t, expected, output)
+	})
 }
 
 func TestParseHTML(t *testing.T) {
@@ -366,7 +431,7 @@ func TestParseHTML(t *testing.T) {
 
 		writeXdgConfig(t, state, map[string]any{
 			config.EnableWaitingMessageTag: false,
-			"indexes":                      []string{},
+			"indexes":                      []string{indices.Nixpkgs},
 			"experimental": map[string]any{
 				"render_docs_indexes": map[string]any{
 					"nvf": srv.URL,
