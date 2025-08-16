@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
@@ -216,7 +217,7 @@ func TestPrintIndexing(t *testing.T) {
 		// reset metadata and run again
 		newpkgs := []string{"televison", "fzf"}
 		setNixpkgs(newpkgs...)
-		setMetadata(t, state, indexer.IndexMetadata{})
+		setMetadata(t, state, indices.Nixpkgs, indexer.IndexMetadata{})
 
 		runPrint(t)
 
@@ -474,6 +475,117 @@ func TestParseHTML(t *testing.T) {
 			"nvf/ _module.args",
 			"nvf/ vim.enableLuaLoader",
 			"nvf/ vim.package",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assertSortEqual(t, expected, output)
+	})
+}
+
+func TestOptionsFile(t *testing.T) {
+	pwd, err := os.Getwd()
+	assert.NoError(t, err)
+	optionsPath := pwd + "/testdata/options.json"
+
+	t.Run("only options_file index in config", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: false,
+			"indexes":                      []string{},
+			"experimental": map[string]any{
+				"options_file": map[string]string{
+					"file": optionsPath,
+				},
+			},
+		})
+
+		printCmd(t)
+
+		expected := strings.Join([]string{
+			"age.ageBin\n",
+			"nixvim.autoCmd\n",
+		}, "")
+		output := state.Stdout.String()
+
+		assert.Equal(t, expected, output)
+	})
+
+	t.Run("path did not change", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: true,
+			"indexes":                      []string{},
+			"experimental": map[string]any{
+				"options_file": map[string]string{
+					"file": optionsPath,
+				},
+			},
+		})
+
+		printCmd(t)
+
+		expected := []string{
+			waitingMessage,
+			"age.ageBin",
+			"nixvim.autoCmd",
+			"",
+		}
+		output := strings.Split(state.Stdout.String(), "\n")
+		assert.Equal(t, expected, output)
+
+		indices.Reset()
+		state.Stdout.Reset()
+
+		setMetadata(t, state, "file", indexer.IndexMetadata{
+			CurrRelease:   optionsPath,
+			LastIndexedAt: time.Time{},
+		})
+
+		printCmd(t)
+
+		expected = []string{
+			// No "Indexing packages..." message means
+			// indexing is not happening
+			"age.ageBin",
+			"nixvim.autoCmd",
+			"",
+		}
+		output = strings.Split(state.Stdout.String(), "\n")
+
+		assert.Equal(t, expected, output)
+	})
+
+	t.Run("the path changed", func(t *testing.T) {
+		state := setup(t)
+
+		writeXdgConfig(t, state, map[string]any{
+			config.EnableWaitingMessageTag: true,
+			"indexes":                      []string{},
+			"experimental": map[string]any{
+				"options_file": map[string]string{
+					"file": optionsPath,
+				},
+			},
+		})
+
+		printCmd(t)
+
+		indices.Reset()
+		state.Stdout.Reset()
+
+		setMetadata(t, state, "file", indexer.IndexMetadata{
+			LastIndexedAt: time.Now().Add(time.Hour * 24 * 2000),
+			CurrRelease:   "/nix/store/previous-path/options.json",
+		})
+
+		printCmd(t)
+
+		expected := []string{
+			waitingMessage,
+			"age.ageBin",
+			"nixvim.autoCmd",
+			"",
 		}
 		output := strings.Split(state.Stdout.String(), "\n")
 		assertSortEqual(t, expected, output)

@@ -34,6 +34,7 @@ type config struct {
 
 type Experimental struct {
 	RenderDocsIndexes map[string]string `json:"render_docs_indexes"`
+	OptionsFile       map[string]string `json:"options_file"`
 }
 
 // Keep the constants below in sync with the `Config` json tags
@@ -98,6 +99,7 @@ func mergeDefaults(loaded config) Config {
 
 	conf.Experimental = Experimental{
 		RenderDocsIndexes: loaded.Experimental.RenderDocsIndexes,
+		OptionsFile:       loaded.Experimental.OptionsFile,
 	}
 
 	return conf

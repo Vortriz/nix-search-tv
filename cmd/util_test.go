@@ -61,14 +61,14 @@ func setup(t *testing.T) state {
 	}
 }
 
-func setMetadata(t *testing.T, state state, md indexer.IndexMetadata) {
+func setMetadata(t *testing.T, state state, index string, md indexer.IndexMetadata) {
 	mdbytes, err := json.Marshal(md)
 	assert.NoError(t, err)
 
 	path := filepath.Join(
 		state.CacheDir,
 		"nix-search-tv",
-		indices.Nixpkgs,
+		index,
 		"metadata.json",
 	)
 	err = os.WriteFile(path, mdbytes, 0666)

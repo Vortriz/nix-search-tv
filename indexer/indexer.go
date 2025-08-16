@@ -109,6 +109,10 @@ func runIndex(
 	return nil
 }
 
+type OptionFileFetcher interface {
+	Path() string
+}
+
 func NeedIndexing(
 	cacheDir string,
 	updateInterval time.Duration,
@@ -117,6 +121,15 @@ func NeedIndexing(
 	needIndex := []Index{}
 
 	for _, index := range indexes {
+		if file, ok := index.Fetcher.(OptionFileFetcher); ok {
+			path := file.Path()
+			if path != index.Metadata.CurrRelease {
+				needIndex = append(needIndex, index)
+			}
+
+			continue
+		}
+
 		if time.Since(index.Metadata.LastIndexedAt) > time.Duration(updateInterval) {
 			needIndex = append(needIndex, index)
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/3timeslazy/nix-search-tv/config"
 	"github.com/3timeslazy/nix-search-tv/indexer"
 	"github.com/3timeslazy/nix-search-tv/indexes/indices"
+	"github.com/3timeslazy/nix-search-tv/indexes/optionsfile"
 	"github.com/3timeslazy/nix-search-tv/indexes/renderdocs"
 )
 
@@ -30,6 +31,21 @@ func SetupIndexes(conf config.Config) ([]string, error) {
 		)
 		if err != nil {
 			return nil, fmt.Errorf("register render_docs index %q: %w", index, err)
+		}
+
+		indexNames = append(indexNames, index)
+	}
+
+	for index, path := range conf.Experimental.OptionsFile {
+		err := indices.Register(
+			index,
+			optionsfile.NewFetcher(path),
+			func() indices.Pkg {
+				return &optionsfile.Package{}
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("register options_file index %q: %w", index, err)
 		}
 
 		indexNames = append(indexNames, index)

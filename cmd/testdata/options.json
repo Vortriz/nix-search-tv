@@ -1,0 +1,40 @@
+{
+  "age.ageBin": {
+    "declarations": [
+      "/nix/store/azcvzd254j7wy5fmlbws96a5zfckjw9d-source/modules/age.nix"
+    ],
+    "default": {
+      "_type": "literalExpression",
+      "text": "\"${pkgs.age}/bin/age\"\n"
+    },
+    "description": "The age executable to use.\n",
+    "loc": [
+      "age",
+      "ageBin"
+    ],
+    "readOnly": false,
+    "type": "string"
+  },
+  "nixvim.autoCmd": {
+    "declarations": [
+      {
+        "name": "<nixvim/modules/autocmd.nix>",
+        "url": "https://github.com/nix-community/nixvim/blob/main/modules/autocmd.nix"
+      }
+    ],
+    "default": {
+      "_type": "literalExpression",
+      "text": "[ ]"
+    },
+    "description": "autocmd definitions",
+    "example": {
+      "_type": "literalExpression",
+      "text": "[\n  {\n    command = \"echo 'Entering a C or C++ file'\";\n    event = [\n      \"BufEnter\"\n      \"BufWinEnter\"\n    ];\n    pattern = [\n      \"*.c\"\n      \"*.h\"\n    ];\n  }\n]"
+    },
+    "loc": [
+      "autoCmd"
+    ],
+    "readOnly": false,
+    "type": "list of (submodule)"
+  }
+}

@@ -43,7 +43,8 @@ func PrintAction(ctx context.Context, cmd *cli.Command) error {
 		requested = slices.DeleteFunc(requested, func(index string) bool {
 			builtin := slices.Contains(conf.Indexes, index)
 			_, renderDocs := conf.Experimental.RenderDocsIndexes[index]
-			return !builtin && !renderDocs
+			_, optionsFile := conf.Experimental.OptionsFile[index]
+			return !builtin && !renderDocs && !optionsFile
 		})
 	}
 
