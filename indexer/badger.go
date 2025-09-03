@@ -93,24 +93,14 @@ func (bdg *Badger) Load(pkgName string) (json.RawMessage, error) {
 	pkg := []byte{}
 
 	err := bdg.badger.View(func(txn *badger.Txn) error {
-		it := txn.NewIterator(badger.DefaultIteratorOptions)
-		defer it.Close()
+		item, err := txn.Get([]byte(pkgName))
+		if err != nil {
+			return err
+		}
 
-		prefix := []byte(pkgName)
-		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
-			item := it.Item()
-			k := item.Key()
-			if !bytes.Equal(k, prefix) {
-				continue
-			}
-
-			var err error
-			pkg, err = item.ValueCopy(nil)
-			if err != nil {
-				return fmt.Errorf("copy value: %w", err)
-			}
-
-			break
+		pkg, err = item.ValueCopy(pkg)
+		if err != nil {
+			return err
 		}
 
 		return nil
