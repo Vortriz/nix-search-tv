@@ -1,7 +1,6 @@
 package indexer
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
