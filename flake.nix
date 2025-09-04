@@ -4,20 +4,12 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-
-    unf = {
-      url = "git+https://git.atagen.co/atagen/unf";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    agenix.url = "github:ryantm/agenix";
   };
 
   outputs = {
     self,
     nixpkgs,
     flake-utils,
-    unf,
-    agenix,
     ...
   }:
     flake-utils.lib.eachDefaultSystem (
@@ -38,17 +30,6 @@
           (mkScript "build-n-tv" "build && print-search | tv --preview-command 'preview-search {}'")
           (mkScript "build-n-fzf" "build && print-search | fzf --wrap --preview 'preview-search {}' --preview-window=wrap --scheme=history")
         ];
-
-        mkModuleOpts = module:
-          unf.lib.json {
-            inherit self;
-            pkgs = nixpkgs.legacyPackages.${system};
-
-            # not all modules can be evaluated that easy. If your module
-            # does not evaluate, try checking this NüschtOS file:
-            #   https://github.com/NuschtOS/search.nuschtos.de/blob/main/flake.nix
-            modules = [module];
-          };
       in {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
@@ -68,8 +49,6 @@
             export CMD_DIR="$PROJECT_ROOT/${cmdPkg}"
           '';
         };
-
-        packages.agenix-opts = mkModuleOpts agenix.nixosModules.default;
 
         packages.default = pkgs.buildGo123Module {
           pname = "nix-search-tv";

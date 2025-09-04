@@ -237,8 +237,6 @@ Here's one way to generate the options.json files for `agenix` and `nixvim` usin
           # extraSpecialArgs is used here to pass the options files
           # that depend on the flake inputs to home-manager modules,
           # where configuration files are usually defined.
-          #
-          # If there is a more elegant way to do that, please let me know
           home-manager.extraSpecialArgs = {
             inherit inputs;
 
@@ -262,6 +260,17 @@ Here's one way to generate the options.json files for `agenix` and `nixvim` usin
   xdg.configFile."nix-search-tv/config.json".text = builtins.toJSON {
     experimental = {
       options_file = {
+        agenix = "${args.agenixOptions}";
+        nixvim = "${args.nixvimOptions}";
+      };
+    };
+  };
+
+  # or, with home-manager
+  programs.nix-search-tv = {
+    enable = true;
+    settings = {
+      experimental.options_file = {
         agenix = "${args.agenixOptions}";
         nixvim = "${args.nixvimOptions}";
       };
