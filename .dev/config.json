@@ -1,4 +1,0 @@
-{
-  "cache_dir": "./.dev/cache",
-  "indexes": ["nixpkgs", "nixos", "home-manager", "nur"]
-}

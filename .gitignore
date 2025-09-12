@@ -1,5 +1,6 @@
-.dev/bin
-.dev/cache
+# The directory for development things. I usually put binary compiled with go build,
+# custom configs, etc.
+.dev
 
 # These files change after integration
 # tests runs
