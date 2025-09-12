@@ -33,7 +33,7 @@
       in {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            go_1_23
+            go_1_25
             gopls
             brotli
             television
@@ -50,7 +50,7 @@
           '';
         };
 
-        packages.default = pkgs.buildGo123Module {
+        packages.default = pkgs.buildGo125Module {
           pname = "nix-search-tv";
           version = self.rev or "unknown";
           src = self;
@@ -60,7 +60,7 @@
           #
           # To find the new hash, uncomment below:
           # vendorHash = nixpkgs.lib.fakeHash;
-          vendorHash = "sha256-ZuhU1+XzJeiGheYNR4lL7AI5vgWvgp6iuJjMcK8t6Mg=";
+          vendorHash = "sha256-vMalPmLe1/Zapkmbc1RSrGQU7Jp+CVfOK+wz7pdecwI=";
 
           subPackages = [cmdPkg];
 
