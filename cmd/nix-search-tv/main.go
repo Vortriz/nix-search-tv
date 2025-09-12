@@ -15,7 +15,7 @@ import (
 var root = &cli.Command{
 	Name:      "nix-search-tv",
 	UsageText: `nix-search-tv [options] [command]`,
-	Usage:     "Nix-related television channel",
+	Usage:     "Fuzzy search for Nix packages",
 	Commands: []*cli.Command{
 		cmd.Print,
 		cmd.Preview,

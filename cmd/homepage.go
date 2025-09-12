@@ -8,7 +8,7 @@ import (
 var Homepage = &cli.Command{
 	Name:      "homepage",
 	UsageText: "nix-search-tv homepage [package_name]",
-	Usage:     "Print the link to the homepage",
+	Usage:     "Print the link to the package homepage",
 	Action:    NewPreviewAction(indices.HomepagePreview),
 	Flags:     BaseFlags(),
 }

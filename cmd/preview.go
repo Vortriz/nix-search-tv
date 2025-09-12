@@ -17,7 +17,7 @@ import (
 var Preview = &cli.Command{
 	Name:      "preview",
 	UsageText: "nix-search-tv preview [package_name]",
-	Usage:     "Print preview for the package",
+	Usage:     "Print package preview",
 	Action:    NewPreviewAction(indices.Preview),
 	Flags:     BaseFlags(),
 }

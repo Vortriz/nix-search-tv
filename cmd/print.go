@@ -16,7 +16,7 @@ import (
 var Print = &cli.Command{
 	Name:      "print",
 	UsageText: "nix-search-tv print",
-	Usage:     "Print the list of all index Nix packages",
+	Usage:     "Print indexed package names. If there is no indexed packages, they'll get indexed first",
 	Action:    PrintAction,
 	Flags:     BaseFlags(),
 }

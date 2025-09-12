@@ -8,7 +8,7 @@ import (
 var Source = &cli.Command{
 	Name:      "source",
 	UsageText: "nix-search-tv source [package_name]",
-	Usage:     "Print the the link to the source code",
+	Usage:     "Print the link to the package's nix declaration",
 	Action:    NewPreviewAction(indices.SourcePreview),
 	Flags:     BaseFlags(),
 }
