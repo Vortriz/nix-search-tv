@@ -60,7 +60,7 @@
           #
           # To find the new hash, uncomment below:
           # vendorHash = nixpkgs.lib.fakeHash;
-          vendorHash = "sha256-vMalPmLe1/Zapkmbc1RSrGQU7Jp+CVfOK+wz7pdecwI=";
+          vendorHash = "sha256-ZuhU1+XzJeiGheYNR4lL7AI5vgWvgp6iuJjMcK8t6Mg=";
 
           subPackages = [cmdPkg];
 
