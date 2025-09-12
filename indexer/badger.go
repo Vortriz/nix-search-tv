@@ -6,7 +6,7 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/3timeslazy/nix-search-tv/indexer/x/jsonstream"
+	"github.com/3timeslazy/nix-search-tv/indexer/jsonstream"
 	"github.com/dgraph-io/badger/v4"
 )
 
