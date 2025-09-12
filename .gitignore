@@ -1,8 +1,10 @@
 .dev/bin
 .dev/cache
 
-integrations/**/metadata.json
-integrations/**/*.vlog
+# These files change after integration
+# tests runs
+tests/**/metadata.json
+tests/**/*.vlog
 
 .direnv
 .DS_Store
