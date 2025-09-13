@@ -1,4 +1,4 @@
-package indexer
+package cmd
 
 import (
 	"testing"
@@ -7,7 +7,6 @@ import (
 )
 
 func TestInjectKey(t *testing.T) {
-
 	t.Run("simple", func(t *testing.T) {
 		pkg := []byte(`{ "version": "v1.0.0" }`)
 		pkg = injectKey("nix-search-tv", pkg)

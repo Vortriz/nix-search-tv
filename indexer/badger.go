@@ -1,10 +1,10 @@
 package indexer
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"strconv"
 
 	"github.com/3timeslazy/nix-search-tv/indexer/jsonstream"
 	"github.com/dgraph-io/badger/v4"
@@ -62,7 +62,7 @@ func (indexer *Badger) Index(data io.Reader, indexedKeys io.Writer) error {
 	err = jsonstream.ParsePackages(data, func(name string, content []byte) error {
 		nameb := []byte(name)
 
-		err := batch.Set(nameb, injectKey(name, content))
+		err := batch.Set(nameb, bytes.Clone(content))
 		if err != nil {
 			return fmt.Errorf("set %s: %w", name, err)
 		}
@@ -103,11 +103,4 @@ func (bdg *Badger) Load(pkgName string) (json.RawMessage, error) {
 
 func (bdg *Badger) Close() error {
 	return bdg.badger.Close()
-}
-
-// injectKey appends the `_key` field into the json object.
-//
-// This thing saves about ~2.5s on my laptop when indexing 120k nix packages
-func injectKey(key string, pkg json.RawMessage) json.RawMessage {
-	return append([]byte(`{"_key":`+strconv.Quote(key)+`,`), pkg[1:]...)
 }
