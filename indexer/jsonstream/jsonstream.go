@@ -6,6 +6,15 @@ import (
 	"io"
 )
 
+// ParsePackages parses packages json file of the format below
+//
+//	{
+//	  "packages": {
+//	    "pkg1": { ... },
+//	    "pkg2": { ... }
+//	  },
+//	  ...
+//	}
 func ParsePackages(pkgs io.Reader, cb func(name string, content []byte) error) error {
 	dec := jsontext.NewDecoder(pkgs)
 
