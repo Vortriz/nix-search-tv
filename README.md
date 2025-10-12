@@ -140,7 +140,7 @@ By default, the configuration file is looked at `$XDG_CONFIG_HOME/nix-search-tv/
   // More about experimental below
   "experimental": {
     "render_docs_indexes": {
-      "nvf": "https://notashelf.github.io/nvf/options.html",
+      "plasma": "https://nix-community.github.io/plasma-manager/options.xhtml",
     },
     "options_file": {
       "agenix": "<path to options.json>",
@@ -168,9 +168,6 @@ By default, the configuration file is looked at `$XDG_CONFIG_HOME/nix-search-tv/
 ```jsonc
 {
   "render_docs_indexes": {
-    // https://github.com/NotAShelf/nvf
-    "nvf": "https://notashelf.github.io/nvf/options.html",
-
     // https://github.com/nix-community/plasma-manager
     "plasma": "https://nix-community.github.io/plasma-manager/options.xhtml",
   },
