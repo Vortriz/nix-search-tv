@@ -45,8 +45,17 @@ func RunIndexing(
 	for _, index := range indexes {
 		go func() {
 			defer wg.Done()
-			err := runIndex(ctx, cacheDir, index)
-			results <- IndexingResult{index.Name, err}
+
+			var err error
+			defer func() {
+				if r := recover(); r != nil {
+					err = fmt.Errorf("index panicked: %v", r)
+				}
+
+				results <- IndexingResult{index.Name, err}
+			}()
+
+			err = runIndex(ctx, cacheDir, index)
 		}()
 	}
 	go func() {
