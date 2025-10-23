@@ -21,6 +21,7 @@ OPEN_SOURCE_KEY="ctrl-s"
 OPEN_HOMEPAGE_KEY="ctrl-o"
 NIX_SHELL_KEY="ctrl-i"
 PRINT_PREVIEW_KEY="ctrl-p"
+YAZI_EXPLORE_KEY="ctrl-e"
 
 OPENER="xdg-open"
 
@@ -30,6 +31,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then
     OPEN_HOMEPAGE_KEY="alt-o"
     NIX_SHELL_KEY="alt-i"
     PRINT_PREVIEW_KEY="alt-p"
+    YAZI_EXPLORE_KEY="alt-e"
 
     OPENER="open"
 fi
@@ -78,6 +80,7 @@ $OPEN_SOURCE_KEY - open source
 $SEARCH_SNIPPET_KEY - search github for snippets
 $NIX_SHELL_KEY - nix-shell
 $PRINT_PREVIEW_KEY - print preview
+$YAZI_EXPLORE_KEY - explore with yazi
 "
 
 FZF_BINDS=""
@@ -106,6 +109,9 @@ SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | xargs printf \"https://github.com/sear
 NIX_SHELL_CMD='nix-shell --run $SHELL -p $(echo "{}" | sed "s:nixpkgs/::g"'
 NIX_SHELL_CMD="$NIX_SHELL_CMD | tr -d \"\'\")"
 
+YAZI_EXPLORE_CMD='yazi $(nix build --no-link --print-out-paths $(echo "{}" | sed "s/\/ /#/g"'
+YAZI_EXPLORE_CMD="$YAZI_EXPLORE_CMD | tr -d \"\'\"))"
+
 PREVIEW_WINDOW="wrap"
 [ "$(tput cols)" -lt 90 ] && PREVIEW_WINDOW="$PREVIEW_WINDOW,up"
 
@@ -116,6 +122,7 @@ eval "$CMD print | fzf \
     --bind $'$SEARCH_SNIPPET_KEY:execute($SEARCH_SNIPPET_CMD | xargs $OPENER)' \
     --bind $'$NIX_SHELL_KEY:become($NIX_SHELL_CMD)' \
     --bind $'$PRINT_PREVIEW_KEY:become($CMD preview \$(cat $STATE_FILE) {})' \
+    --bind $'$YAZI_EXPLORE_KEY:become($YAZI_EXPLORE_CMD)' \
     --layout reverse \
     --scheme history \
     --preview-window='$PREVIEW_WINDOW' \
