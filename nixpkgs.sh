@@ -2,7 +2,7 @@
 
 # In case the system uses a non-POSIX shell, like fish or nushell,
 # we want to ensure run also our forked processes in a bash environment.
-SHELL="bash"
+SHELL="fish"
 
 # === Change keybinds or add more here ===
 
@@ -78,7 +78,7 @@ save_state() {
 HEADER="$OPEN_HOMEPAGE_KEY - open homepage
 $OPEN_SOURCE_KEY - open source
 $SEARCH_SNIPPET_KEY - search github for snippets
-$NIX_SHELL_KEY - nix-shell
+$NIX_SHELL_KEY - nix shell
 $PRINT_PREVIEW_KEY - print preview
 $YAZI_EXPLORE_KEY - explore with yazi
 "
@@ -106,7 +106,7 @@ SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | tr -d \"\'\" "
 SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | awk \'{ if (\$2) { print \$2 } else print \$1 }\' "
 SEARCH_SNIPPET_CMD="$SEARCH_SNIPPET_CMD | xargs printf \"https://github.com/search?type=code&q=lang:nix+%s\" \$1 "
 
-NIX_SHELL_CMD='nix-shell --run $SHELL -p $(echo "{}" | sed "s:nixpkgs/::g"'
+NIX_SHELL_CMD='nix shell $(echo "{}" | sed "s/\/ /#/g"'
 NIX_SHELL_CMD="$NIX_SHELL_CMD | tr -d \"\'\")"
 
 YAZI_EXPLORE_CMD='yazi $(nix build --no-link --print-out-paths $(echo "{}" | sed "s/\/ /#/g"'
